@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% block title %}<title>Patacrep Offline Database</title>{% endblock %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <!-- Add additional CSS in static file -->
+  {% load static %}
+  <!-- <link rel="stylesheet" href="{% static 'css/styles.css' %}"> -->
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-3">
+      {% block sidebar %}
+        <ul class="sticky-top" style="overflow-y: scroll; height:100vh;">
+          <li><a href="{% url 'patacrep:index' %}">Home</a></li>
+          <li>Search</li>
+          <li>Artists</li>
+          <div id="list-example" class="list-group">
+            {% for artist in artist_list %}
+                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-0" href="{% url 'patacrep:index' %}#{{ artist.0 }}">{{ artist.0 }}
+                <span class="badge badge-primary badge-pill">{{ artist.1 }}</span></a>
+            {% endfor %}
+          </div>
+
+        </ul>
+      {% endblock %}
+      </div>
+      <div class="col-sm-8">
+        <table class="table table-sm">
+          <tr>
+            <th>
+                <h3>{% block pagetitle %}{% endblock %}</h3> 
+            </th>
+            {% block buttons %}
+            {% endblock %}
+          </tr>
+        </table>
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+{% block js %}{% endblock %}

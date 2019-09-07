@@ -1,0 +1,49 @@
+{% extends "patacrep/base_template.html" %}
+
+{% block pagetitle %}
+{{chord}}
+{% endblock %}
+
+{% block buttons %}
+<th>
+    <a class="btn btn-primary" href="{% url 'patacrep:detail' chord.id %}" id="save_edit" chord_pk="{{chord.pk}}">save</a>
+</th>
+<th>
+    <a class="btn btn-primary" href="{% url 'patacrep:detail' chord.id %}">cancel</a>
+</th>
+{% endblock %}
+
+{% block content %}
+<!-- {% autoescape off %} -->
+<!-- <span> -->
+  <div contenteditable="true" style="font-family:Courier; font-size: 75%;white-space:pre;display: inline-block;" id="modified_content">{{chord.content}}</div>
+<!-- </span> -->
+<!-- {% endautoescape %} -->
+{% endblock %}
+
+
+{% block js %}
+  <script
+    src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+    crossorigin="anonymous">
+  </script>
+  <script>
+    $("#save_edit").click(function () {
+      var chord_pk = $(this).attr("chord_pk");
+      var modified_content = $("#modified_content").text();
+      $.ajax({
+        url: '{% url "patacrep:save_edit" %}',
+        type: "GET",
+        data: {
+          'modified_content': modified_content,
+          'chord_pk': chord_pk
+        },
+        dataType: 'json',
+        success: function (data) {
+          alert("Successfully modified : " + data.pkid);
+        }
+      });
+    });
+  </script>
+{% endblock %}

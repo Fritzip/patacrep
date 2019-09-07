@@ -1,0 +1,77 @@
+{% extends "patacrep/base_template.html" %}
+
+{% block pagetitle %}
+{{chord}}
+{% endblock %}
+
+{% block buttons %}
+<th>
+    <a class="btn btn-primary" href="{% url 'patacrep:detail' chord.id %}">view</a>
+</th>
+<th>
+    <a class="btn btn-primary" href="{% url 'patacrep:index' %}" id="save_edit" chord_pk="{{chord.pk}}">save & quit</a>
+</th>
+<th>
+    <a class="btn btn-primary" href="{% url 'patacrep:index' %}">cancel</a>
+</th>
+<th>
+    <a class="btn btn-primary" id="save_and_next" chord_pk="{{chord.pk}}">save & next</a>
+</th>
+{% endblock %}
+
+{% block content %}
+<!-- {% autoescape off %} -->
+<!-- <span> -->
+  <div class="list-group">
+      {% for line in modified_lines %}
+        <button type="button" id="{{ line.0 }}" class="del_line list-group-item py-0 border-0 {% if line.2 %}list-group-item-danger{% elif line.3 %}list-group-item-warning{% endif %} text-left" style="font-family:Courier; font-size: 75%;white-space:pre; display: inline-block; outline: none !important; box-shadow: none;"> {{ line.1 }}</button>
+      {% endfor %}
+  </div>
+
+<!-- </span> -->
+<!-- {% endautoescape %} -->
+
+{% endblock %}
+
+
+{% block js %}
+  <script
+    src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+    crossorigin="anonymous">
+  </script>
+  <script>
+    $('.del_line').click(function(e) { 
+      e.target.classList.toggle("list-group-item-danger");
+    });
+  </script>
+  <script>
+    $("#save_and_next").click(function () {
+      var chord_pk = $(this).attr("chord_pk");
+      var modified_content = "" ;
+      $( ".del_line" ).each(function( index, e ) {
+        if (!$( e ).hasClass("list-group-item-danger") ) {
+          modified_content = modified_content.concat($(e).text(), '\n');
+        }
+      });
+      $.ajax({
+        url: '{% url "patacrep:save_and_next" %}',
+        type: "GET",
+        data: {
+          'modified_content': modified_content,
+          'chord_pk': chord_pk
+        },
+        dataType: 'json',
+        success: function (data) {
+          // console.log(data.pkid);
+          window.location.href = '{% url "patacrep:confirm_remove" 0 %}'.replace('0', data.pkid);
+          // location.href = "http://www.example.com/ThankYou.html"; 
+          // if (data.is_taken) {
+          //   alert("Successfully modified : " + data.pkid);
+          // }
+        }
+      });
+    });
+  </script>
+
+{% endblock %}
