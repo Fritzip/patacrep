@@ -1,63 +1,14 @@
 {% extends "patacrep/base_template.html" %}
 
 {% block pagetitle %}
-  Patacrep Offline Database
+  Index
 {% endblock %}
 
 {% block content %}
-  <table class="table">
-    <tr>
-      <th>
-          <form action="{% url 'patacrep:index' %}" method="post">
-              {% csrf_token %}
-              <button class="btn btn-primary" type="submit" name="update">Update</button>
-          </form>
-      </th>
-      <th>
-          <b>{{ nb_chords }} chords in the database.</b>
-      </th>
-    </tr>
-  </table>
-  {% if output %}
-      {% if output.imports %}
-          <p><b>{{ output.imports|length }} new file(s) imported</b></p>
-      {% endif %}
-      {% if output.new_to_db %}
-          <p><b>{{ output.new_to_db|length }} new file(s) added to database.</b>
-          {% for name in output.new_to_db %}
-              <li>{{ name }}</li>
-          {% endfor %}</p>
-      {% endif %}
-      {% if output.already_in_db %}
-          <p><b>{{ output.already_in_db|length }} file(s) already in database.</b></p>
-      {% endif %}
-      {% if output.duplicates %}
-          <p><b>{{ output.duplicates|length }} duplicates.</b> <i>Choose the one you want from your bookmarks, remove the other, delete the tab from the database and re-update.</i>
-          {% for name in output.duplicates %}
-              <li>{{ name }}</li>
-          {% endfor %}</p>
-      {% endif %}
-      {% if output.errors_imports %}
-          <p><b>{{ output.errors_imports|length }} error(s) while importing.</b>
-          {% for url in output.errors_imports %}
-              <li>{{ url }}</li>
-          {% endfor %}</p>
-      {% endif %}
-      {% if output.errors_add_to_db %}
-          <p><b>{{ output.errors_add_to_db|length }} error(s) while adding to database.</b>
-          {% for url in output.errors_add_to_db %}
-              <li>{{ url }}</li>
-          {% endfor %}</p>
-      {% endif %}
-  {% endif %}
-
-
-  <div data-spy="scroll" data-target="#list-example" data-offset="0" class="scrollspy-example">
-    {% for artist, chords in dartist.items %}
-      <span id="{{ artist }}" class="font-weight-bold">{{ artist }}</span>
-      {% for chord in chords %}
-        <li><a href="{% url 'patacrep:detail' chord.id %}">{{ chord.title }}</a> {% if chord.removed_content_confirmation or chord.warning_lines %}<a href="{% url 'patacrep:confirm_remove' chord.id %}" class="badge badge-warning">confirm</a>{% endif %}</li>
-      {% endfor %}
+  {% for artist, chords in dartist.items %}
+    <span id="{{ artist }}" class="font-weight-bold mx-2">{{ artist }}</span>
+    {% for chord in chords %}
+      <li class="mx-1"><a href="{% url 'patacrep:detail' chord.id %}">{{ chord.title }}</a> {% if chord.removed_content_confirmation or chord.warning_lines %}<a href="{% url 'patacrep:confirm_remove' chord.id %}" class="badge badge-warning float-right mx-1">confirm</a>{% endif %}</li>
     {% endfor %}
-  </div>
+  {% endfor %}
 {% endblock %}

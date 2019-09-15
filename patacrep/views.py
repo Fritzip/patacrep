@@ -87,6 +87,7 @@ def next(request):
             save_next = True
 
     # json response
+    print(next_chord.pk)
     data = {
         'pkid': next_chord.pk
     }

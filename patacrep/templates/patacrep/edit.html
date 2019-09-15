@@ -5,12 +5,8 @@
 {% endblock %}
 
 {% block buttons %}
-<th>
     <a class="btn btn-primary" href="{% url 'patacrep:detail' chord.id %}" id="save_edit" chord_pk="{{chord.pk}}">save</a>
-</th>
-<th>
     <a class="btn btn-primary" href="{% url 'patacrep:detail' chord.id %}">cancel</a>
-</th>
 {% endblock %}
 
 {% block content %}

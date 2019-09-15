@@ -1,24 +1,18 @@
 {% extends "patacrep/base_template.html" %}
 
 {% block pagetitle %}
-{{ chord.title }} <small>{{ chord.artist }}</small>
+{{ chord.title }} - <small>{{ chord.artist }}</small>
 {% endblock %}
 
 {% block buttons %}
-<th>
-    <a class="btn btn-primary" href="{% url 'patacrep:edit' chord.id %}">edit</a>
-</th>
-<th>
-    <a class="btn btn-primary" id="clean" chord_pk="{{chord.pk}}">clean</a>
-</th>
-<th>
-    <a class="btn btn-primary" id="next" chord_pk="{{chord.pk}}">next</a>
-</th>
+  <a class="btn btn-primary" href="{% url 'patacrep:edit' chord.id %}">edit</a>
+  <a class="btn btn-primary" id="clean" chord_pk="{{chord.pk}}">clean</a>
+  <a class="btn btn-primary" id="next" chord_pk="{{chord.pk}}">next</a>
 {% endblock %}
 
 {% block content %}
-{% autoescape off %}
-<div contenteditable="false" style="font-family:Courier; font-size: 75%;white-space:pre">{{chord.content}}</div>
+{% autoescape on %}
+<div id="chordcontent">{{chord.content}}</div>
 {% endautoescape %}
 {% endblock %}
 
@@ -27,6 +21,15 @@
     src="https://code.jquery.com/jquery-3.4.1.min.js"
     integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
     crossorigin="anonymous">
+  </script>
+  <script>
+    $(document).ready(function(){
+      var lines = $('#chordcontent').text().split('\n');
+      for(var i = 0;i < lines.length;i++){
+        lines[i] = "<div class=\"chordline\">" + lines[i] + "</div>";
+      }
+      $("#chordcontent").replaceWith(lines.join("\n"));
+    });
   </script>
   <script>
     $("#next").click(function () {
