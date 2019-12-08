@@ -1,11 +1,13 @@
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.core.paginator import Paginator
 from django.db.models import Q
 
 from .models import Chord
 from .scripts import update_all, clean_chord, format_content
+
+import random
 
 def get_chord_name_from_id(pkid):
     return str(Chord.objects.get(pk=pkid))
@@ -142,3 +144,31 @@ def save_edit(request):
         'pkid': chord_pk
     }
     return JsonResponse(data)
+
+def nextprevrand(request, chord_id, npr):
+    print(npr, chord_id)
+    chord = get_object_or_404(Chord, pk=chord_id)
+
+    sorted_chord_list = list(Chord.objects.order_by('artist', 'title').values_list('id', flat=True))
+    idx = sorted_chord_list.index(chord_id)
+
+
+    if npr == 'next':
+        if idx < len(sorted_chord_list) - 1:
+            npr_id = sorted_chord_list[idx + 1]
+        else:
+            # last chord
+            pass
+    elif npr == 'prev':
+        if idx > 0:
+            npr_id = sorted_chord_list[idx - 1]
+        else:
+            # first chord
+            pass
+    elif npr == 'rand':
+        npr_id = random.choice(sorted_chord_list)
+        print(npr_id)
+    else:
+        pass # raise 404
+    return redirect('patacrep:detail', chord_id=npr_id)
+    # return render(request, 'patacrep/detail.html', {'chord': chord})

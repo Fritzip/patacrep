@@ -1,27 +1,42 @@
 {% extends "patacrep/base_template.html" %}
+{% load static %}
 
 {% block pagetitle %}
 {{ chord.title }} - <small>{{ chord.artist }}</small>
 {% endblock %}
 
 {% block buttons %}
-  <a class="btn btn-primary" href="{% url 'patacrep:edit' chord.id %}">edit</a>
-  <a class="btn btn-primary" id="clean" chord_pk="{{chord.pk}}">clean</a>
-  <a class="btn btn-primary" id="next" chord_pk="{{chord.pk}}">next</a>
+  <a class="btn btn-primary" href="{% url 'patacrep:nextprevrand' chord.pk 'rand' %}"><i class="fas fa-random"></i></a>
+  <a class="btn btn-primary" href="{% url 'patacrep:nextprevrand' chord.pk 'prev' %}"><i class="fas fa-angle-left"></i></a>
+  <a class="btn btn-primary" href="{% url 'patacrep:nextprevrand' chord.pk 'next' %}"><i class="fas fa-angle-right"></i></a>
 {% endblock %}
+
+{% block options %}
+<a class="dropdown-item" href="{% url 'patacrep:edit' chord.id %}">edit</a>
+<a class="dropdown-item" id="clean" chord_pk="{{chord.pk}}" href="#">clean</a>
+{% endblock options %}
+
+{% block infotab %}
+  {% if chord.favorite %}
+      <i class="fas fa-star" style="color:yellow"></i>
+  {% else %}
+      <i class="far fa-star"></i>
+  {% endif %}
+{% endblock infotab %}
+
 
 {% block content %}
 {% autoescape on %}
-<div id="chordcontent">{{chord.content}}</div>
+<div id="chordcontent">
+{{ chord.content }}
+</div>
 {% endautoescape %}
 {% endblock %}
 
 {% block js %}
-  <script
-    src="https://code.jquery.com/jquery-3.4.1.min.js"
-    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-    crossorigin="anonymous">
-  </script>
+  <!-- jQuery -->
+  <script src="{% static 'external/jquery-3.4.1.min.js' %}"></script>
+
   <script>
     $(document).ready(function(){
       var lines = $('#chordcontent').text().split('\n');
@@ -31,49 +46,23 @@
       $("#chordcontent").replaceWith(lines.join("\n"));
     });
   </script>
+  
   <script>
-    $("#next").click(function () {
-      var chord_pk = $(this).attr("chord_pk");
-      $.ajax({
-        url: '{% url "patacrep:ajax_next" %}',
-        type: "POST",
-        data: {
-            csrfmiddlewaretoken: '{{ csrf_token }}',
-            'chord_pk': chord_pk
-        },
-        dataType: 'json',
-        success: function (data) {
-          // console.log(data.pkid);
-          window.location.href = '{% url "patacrep:detail" 0 %}'.replace('0', data.pkid);
-          // location.href = "http://www.example.com/ThankYou.html"; 
-          // if (data.is_taken) {
-          //   alert("Successfully modified : " + data.pkid);
-          // }
-        }
-      });
-    });
-  </script>
-  <script>
-    $("#clean").click(function () {
-      var chord_pk = $(this).attr("chord_pk");
-      $.ajax({
-        url: '{% url "patacrep:ajax_clean" %}',
-        type: "POST",
-        data: {
-            csrfmiddlewaretoken: '{{ csrf_token }}',
-            'chord_pk': chord_pk
-        },
-        dataType: 'json',
-        success: function (data) {
-          // console.log(data.pkid);
-          window.location.href = '{% url "patacrep:detail" 0 %}'.replace('0', data.pkid);
-          // location.href = "http://www.example.com/ThankYou.html"; 
-          // if (data.is_taken) {
-          //   alert("Successfully modified : " + data.pkid);
-          // }
-        }
-      });
-    });
-  </script>
 
-{% endblock %}
+    $(document).ready(function() {
+      $(document).on('click', '.fa-star', function(){
+        var pref = $(this).attr('data-prefix');
+        if(pref == 'fas'){
+          $(this).attr('data-prefix', 'far');
+          $(this).css('color', 'unset');
+        } else if (pref == 'far') {
+          $(this).attr('data-prefix', 'fas');
+          $(this).css('color', 'yellow');
+        } else {
+          console.log("mistake");
+        }
+      });
+    });
+
+  </script>
+{% endblock js %}

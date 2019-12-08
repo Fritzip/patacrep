@@ -1,129 +1,37 @@
-/* Toggle Styles */
-.navbar {
-    background-color: silver;
+@font-face {
+  font-family: Grand Hotel;
+  src: local("GrandHotel-Regular"),
+       url(GrandHotel-Regular.ttf);
 }
 
-#wrapper {
-    padding-left: 0;
-    -webkit-transition: all 0.5s ease;
-    -moz-transition: all 0.5s ease;
-    -o-transition: all 0.5s ease;
-    transition: all 0.5s ease;
+@font-face {
+  font-family: Roboto;
+  src: local("Roboto-Regular"),
+       url(Roboto-Regular.ttf);
 }
 
-#wrapper.toggled {
-    padding-left: 350px;
+@font-face {
+  font-family: RobotoMono;
+  src: local("RobotoMono-Regular"),
+       url(RobotoMono-Regular.ttf);
 }
 
-#sidebar-wrapper {
-    z-index: 1000;
-    position: fixed;
-    left: 350px;
-    width: 0;
-    height: 100%;
-    margin-left: -350px;
-    overflow-y: auto;
-    /*background: #000;*/
-    -webkit-transition: all 0.5s ease;
-    -moz-transition: all 0.5s ease;
-    -o-transition: all 0.5s ease;
-    transition: all 0.5s ease;
+@font-face {
+  font-family: SourceSansPro;
+  src: local("SourceSansPro-Regular"),
+       url(SourceSansPro-Regular.ttf);
 }
 
-#wrapper.toggled #sidebar-wrapper {
-    width: 350px;
-}
-
-#page-content-wrapper {
-    width: 100%;
-    position: absolute;
-    padding: 15px;
-}
-
-#wrapper.toggled #page-content-wrapper {
-    position: absolute;
-    margin-right: -350px;
-}
-
-/* Sidebar Styles */
-
-.sidebar-nav {
-    position: absolute;
-    top: 0;
-    width: 350px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.sidebar-nav li {
-    text-indent: 20px;
-    line-height: 40px;
-}
-
-.sidebar-nav li a {
-    display: block;
-    text-decoration: none;
-    color: #999999;
-}
-
-.sidebar-nav li a:hover {
-    text-decoration: none;
-    color: #fff;
-    background: rgba(255,255,255,0.2);
-}
-
-.sidebar-nav li a:active,
-.sidebar-nav li a:focus {
-    text-decoration: none;
-}
-
-.sidebar-nav > .sidebar-brand {
-    height: 65px;
-    font-size: 18px;
-    line-height: 60px;
-}
-
-.sidebar-nav > .sidebar-brand a {
-    color: #999999;
-}
-
-.sidebar-nav > .sidebar-brand a:hover {
-    color: #fff;
-    background: none;
-}
-
-@media(min-width:768px) {
-    #wrapper {
-        padding-left: 350px;
-    }
-
-    #wrapper.toggled {
-        padding-left: 0;
-    }
-
-    #sidebar-wrapper {
-        width: 350px;
-    }
-
-    #wrapper.toggled #sidebar-wrapper {
-        width: 0;
-    }
-
-    #page-content-wrapper {
-        padding: 20px;
-        position: relative;
-    }
-
-    #wrapper.toggled #page-content-wrapper {
-        position: relative;
-        margin-right: 0;
-    }
+@font-face {
+  font-family: SourceCodePro;
+  src: local("SourceCodePro-Regular"),
+       url(SourceCodePro-Regular.ttf);
 }
 
 html,
 body {
   height: 100%;
+  font-family: SourceSansPro;
 }
 
 span {
@@ -141,13 +49,47 @@ span {
 }
 
 .header {
-  flex: 0 1 auto;
-  background-color: grey;
+    display: flex;
+    flex-flow: row;
+    flex: 0 1 auto;
+    align-items: center;
+    background-color: #39325d;
+    color: #dadae0;
 }
 
-.footer {
-  flex: 0 1 auto;
-  background-color: grey;
+.menu-toggle {
+  margin-left: 10px;
+  color: unset;
+}
+
+a.website-name {
+  font-family: Grand Hotel;
+  font-size: 34px;
+  padding: 5px 10px;
+  color: unset;
+}
+
+a.website-name:hover {
+  color:#b2b2ff;
+  text-decoration: none;
+}
+
+.page-title {
+  font-size: 24px;
+  padding: 5px 10px;
+  margin-left: auto;
+}
+
+.page-buttons {
+  display: flex;
+  flex-flow: row;
+  margin-right: 10px;
+  margin-left: auto;
+  align-items: center;
+}
+
+.page-buttons > a, .page-buttons > div {
+  margin: 5px;
 }
 
 .content-wrapper {
@@ -174,7 +116,7 @@ span {
 }
 
 .chordline {
-  font-family:Courier;
+  font-family: SourceCodePro;
   font-size: 75%;
   white-space:pre;
   padding-right: 1em;

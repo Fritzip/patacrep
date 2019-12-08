@@ -16,4 +16,5 @@ urlpatterns = [
     path('ajax/next/', views.next, name='ajax_next'),
     path('ajax/clean/', views.clean, name='ajax_clean'),
     path('save_edit/', views.save_edit, name='save_edit'),
+    path('<int:chord_id>/<str:npr>/', views.nextprevrand, name='nextprevrand'),
 ]

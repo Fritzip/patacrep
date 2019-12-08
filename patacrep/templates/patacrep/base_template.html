@@ -9,26 +9,44 @@
   <link rel="stylesheet" href="{% static 'external/bootstrap-4.3.1/css/bootstrap.min.css' %}">
   <!-- Custom CSS -->
   <link rel="stylesheet" href="{% static 'patacrep/style.css' %}">
+  <!-- <link rel="stylesheet" href="{% static 'patacrep/style-dark.css' %}"> -->
   
   <!-- jQuery -->
   <script src="{% static 'external/jquery-3.4.1.min.js' %}"></script>
+
+  <!-- Bootstrap -->
+  <script src="{% static 'external/bootstrap-4.3.1/js/bootstrap.bundle.min.js' %}"></script>
 
   <!-- Font awesome -->
   <script src="{% static 'external/fontawesome-5.11.2/js/all.min.js' %}"></script>
 
   {% block js %}
   {% endblock %}
+
 </head>
 
 <body>
   <div class="box">
     <div class="header">
-      <a href="{% url 'patacrep:index' %}" class="btn btn-default"><i class="fas fa-home"></i></a>
-      <h3 class="navbar-brand">Patacrep</h3>
-      <a href="#menu-toggle" class="btn btn-default menu-toggle"><i class="fas fa-bars"></i></a>
-      <h3 class="navbar-brand">{% block pagetitle %}{% endblock %}</h3>
-      {% block buttons %}
-      {% endblock %}
+      <a href="#menu-toggle" class="menu-toggle"><i class="fas fa-bars"></i></a>
+      <a class="website-name" href="{% url 'patacrep:index' %}">Patacrep</a>
+      <div class="page-title">{% block pagetitle %}{% endblock %}</div>
+      {% block infotab %}
+      {% endblock infotab %}
+      <div class="page-buttons">
+        {% block buttons %}
+        {% endblock buttons %}
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-cog"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+            {% block options %}
+            {% endblock options %}
+            <a class="dropdown-item" href="#">Default action</a>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="content-wrapper">
       <nav class="sidebar">
@@ -54,6 +72,7 @@
 
   <!-- Menu Toggle Script -->
   <script>
+    $(".sidebar").toggle(); 
   $(".menu-toggle").click(function(e) {
       e.preventDefault();
       $(".sidebar").toggle(); 
