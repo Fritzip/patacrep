@@ -22,6 +22,16 @@
   {% else %}
       <i class="far fa-star"></i>
   {% endif %}
+  {% if chord.capo > 0 %}
+      <span>Capo {{ chord.capo }}</span>
+  {% endif %}
+  <select class="form-control form-control-sm p-0" id="start-note-selector">
+    <option value="one">A</option>
+    <option selected="two">B</option>
+    <option value="three">C#</option>
+    <option value="four">D</option>
+    <option value="five">G#</option>
+  </select>
 {% endblock infotab %}
 
 

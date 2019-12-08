@@ -82,14 +82,16 @@ a.website-name:hover {
 
 .page-buttons {
   display: flex;
-  flex-flow: row;
+  flex-flow: row wrap;
   margin-right: 10px;
   margin-left: auto;
   align-items: center;
 }
 
-.page-buttons > a, .page-buttons > div {
+.page-buttons > a, .page-buttons > div  {
   margin: 5px;
+  display: flex;
+  align-items: center; 
 }
 
 .content-wrapper {
@@ -122,4 +124,20 @@ a.website-name:hover {
   padding-right: 1em;
   padding-left: 1em;
   border-right: 1px dashed #333;
+}
+
+#start-note-selector {
+  width: fit-content;
+  height: fit-content;
+}
+
+.infotab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-right: auto;
+}
+
+.infotab * {
+  margin:5px;
 }

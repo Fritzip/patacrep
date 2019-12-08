@@ -31,8 +31,10 @@
       <a href="#menu-toggle" class="menu-toggle"><i class="fas fa-bars"></i></a>
       <a class="website-name" href="{% url 'patacrep:index' %}">Patacrep</a>
       <div class="page-title">{% block pagetitle %}{% endblock %}</div>
-      {% block infotab %}
-      {% endblock infotab %}
+      <div class="infotab">
+        {% block infotab %}
+        {% endblock infotab %}
+      </div>
       <div class="page-buttons">
         {% block buttons %}
         {% endblock buttons %}
