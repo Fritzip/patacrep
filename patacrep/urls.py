@@ -6,7 +6,7 @@ from . import views
 app_name = 'patacrep'
 urlpatterns = [
     path('', views.index, name='index'),
-    path('<int:chord_id>/', views.detail, name='detail'),
+    path('<int:pk>/', views.ChordDetail.as_view(), name='detail'),
     path('<int:chord_id>/edit/', views.edit, name='edit'),
     path('<int:chord_id>/confirm_remove/', views.confirm_remove, name='confirm_remove'),
     #url(r'^signup/$', views.SignUpView.as_view(), name='signup'),
@@ -16,5 +16,5 @@ urlpatterns = [
     path('ajax/next/', views.next, name='ajax_next'),
     path('ajax/clean/', views.clean, name='ajax_clean'),
     path('save_edit/', views.save_edit, name='save_edit'),
-    path('<int:chord_id>/<str:npr>/', views.nextprevrand, name='nextprevrand'),
+    # path('<int:chord_id>/<str:npr>/', views.nextprevrand, name='nextprevrand'),
 ]
