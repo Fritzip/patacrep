@@ -58,21 +58,75 @@
   </script>
   
   <script>
-
+    // Favorite toggle (star)
     $(document).ready(function() {
       $(document).on('click', '.fa-star', function(){
-        var pref = $(this).attr('data-prefix');
-        if(pref == 'fas'){
-          $(this).attr('data-prefix', 'far');
-          $(this).css('color', 'unset');
-        } else if (pref == 'far') {
-          $(this).attr('data-prefix', 'fas');
-          $(this).css('color', 'yellow');
-        } else {
-          console.log("mistake");
-        }
+        var star = $(this);
+        $.ajax({
+          url: '{% url "patacrep:toggle_favorite" %}',
+          type: "POST",
+          data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              'chord_pk': '{{chord.pk}}',
+          },
+          dataType: 'json',
+          success: function (data) {
+            if (data.added) {
+              $(star).attr('data-prefix', 'fas');
+              $(star).css('color', 'yellow');
+            } else {
+              $(star).attr('data-prefix', 'far');
+              $(star).css('color', 'unset');
+            }
+          }
+        });
       });
     });
 
+  </script>
+
+  <script>
+    $("#next").click(function () {
+      var chord_pk = $(this).attr("chord_pk");
+      $.ajax({
+        url: '{% url "patacrep:ajax_next" %}',
+        type: "POST",
+        data: {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            'chord_pk': chord_pk
+        },
+        dataType: 'json',
+        success: function (data) {
+          // console.log(data.pkid);
+          window.location.href = '{% url "patacrep:detail" 0 %}'.replace('0', data.pkid);
+          // location.href = "http://www.example.com/ThankYou.html"; 
+          // if (data.is_taken) {
+          //   alert("Successfully modified : " + data.pkid);
+          // }
+        }
+      });
+    });
+  </script>
+  <script>
+    $("#clean").click(function () {
+      var chord_pk = $(this).attr("chord_pk");
+      $.ajax({
+        url: '{% url "patacrep:ajax_clean" %}',
+        type: "POST",
+        data: {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            'chord_pk': chord_pk
+        },
+        dataType: 'json',
+        success: function (data) {
+          // console.log(data.pkid);
+          window.location.href = '{% url "patacrep:detail" 0 %}'.replace('0', data.pkid);
+          // location.href = "http://www.example.com/ThankYou.html"; 
+          // if (data.is_taken) {
+          //   alert("Successfully modified : " + data.pkid);
+          // }
+        }
+      });
+    });
   </script>
 {% endblock js %}

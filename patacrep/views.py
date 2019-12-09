@@ -71,6 +71,18 @@ class ChordDetail(DetailView):
 
         return context
 
+def toggle_favorite(request):
+    chord_pk = request.POST['chord_pk']
+    chord = get_object_or_404(Chord, pk=chord_pk)
+    chord.favorite = not chord.favorite
+    chord.save()
+
+    data = {
+        'added': chord.favorite
+    }
+    return JsonResponse(data)
+
+
 def edit(request, chord_id):
     chord = get_object_or_404(Chord, pk=chord_id)
     return render(request, 'patacrep/edit.html', {'chord': chord})
