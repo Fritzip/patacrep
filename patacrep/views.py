@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.views.generic import DetailView
 
-from .models import Chord
+from .models import Chord, ChordForm
 from .scripts import update_all, clean_chord, format_content
 
 import random
@@ -15,9 +15,6 @@ def get_chord_name_from_id(pkid):
 
 def index(request):
     chords_list = Chord.objects.order_by('artist')#[:5]
-    # paginator = Paginator(chords_list, 25) # Show 25 contacts per page
-    # page = request.GET.get('page')
-    # chords = paginator.get_page(page)
     dartist = {}
     for chord in chords_list:
         try:
@@ -36,11 +33,6 @@ def index(request):
 
     return render(request, 'patacrep/index.html', context)
 
-# def detail(request, chord_id):
-#     chord = get_object_or_404(Chord, pk=chord_id)
-#     return render(request, 'patacrep/detail.html', {'chord': chord})
-
-
 class ChordDetail(DetailView):
     model = Chord
     template_name = 'patacrep/detail.html'
@@ -50,6 +42,7 @@ class ChordDetail(DetailView):
 
         # Call the base implementation first to get a context
         context = super(ChordDetail, self).get_context_data(**kwargs)
+        context['form'] = ChordForm
 
         sorted_chord_list = list(Chord.objects.order_by('artist', 'title').values_list('id', flat=True))
         idx = sorted_chord_list.index(self.object.id)
@@ -82,6 +75,14 @@ def toggle_favorite(request):
     }
     return JsonResponse(data)
 
+def change_start_note(request):
+    chord_pk = request.POST['chord_pk']
+    chord = get_object_or_404(Chord, pk=chord_pk)
+    chord.start_note = request.POST['new_start_note']
+    chord.save()
+
+    data = {}
+    return JsonResponse(data)
 
 def edit(request, chord_id):
     chord = get_object_or_404(Chord, pk=chord_id)

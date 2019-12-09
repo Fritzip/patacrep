@@ -25,12 +25,15 @@
   {% if chord.capo > 0 %}
       <span>Capo {{ chord.capo }}</span>
   {% endif %}
+
   <select class="form-control form-control-sm p-0" id="start-note-selector">
-    <option value="one">A</option>
-    <option selected="two">B</option>
-    <option value="three">C#</option>
-    <option value="four">D</option>
-    <option value="five">G#</option>
+    {% for value, text in form.start_note.field.choices %}
+      {% if value == chord.start_note %}
+        <option selected="{{ value }}">{{text}}</option>
+      {% else %}
+        <option value="{{ value }}">{{text}}</option>
+      {% endif %}
+    {% endfor %}
   </select>
 {% endblock infotab %}
 
@@ -78,6 +81,23 @@
               $(star).attr('data-prefix', 'far');
               $(star).css('color', 'unset');
             }
+          }
+        });
+      });
+
+      $(document).on('change', '#start-note-selector', function() {
+        var new_start_note_value = $('#start-note-selector').find(":selected").attr('value');
+        $.ajax({
+          url: '{% url "patacrep:change_start_note" %}',
+          type: "POST",
+          data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              'chord_pk': '{{chord.pk}}',
+              'new_start_note': new_start_note_value, 
+          },
+          dataType: 'json',
+          success: function (data) {
+            // todo notification
           }
         });
       });

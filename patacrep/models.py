@@ -18,18 +18,18 @@ class Chord(models.Model):
     comment = models.TextField(blank=True)
     NOTES = (        
         ("-", "-"),
-        ("A", "A"),
-        ("A#", "A#"),
-        ("B", "B"),
-        ("C", "C"),
-        ("C#", "C#"),
-        ("D", "D"),
-        ("D#", "D#"),
-        ("E", "E"),
-        ("F", "F"),
-        ("F#", "F#"),
-        ("G", "G"),
-        ("G#", "G#"),
+        ("a", "A"),
+        ("as", "A#"),
+        ("b", "B"),
+        ("c", "C"),
+        ("cs", "C#"),
+        ("d", "D"),
+        ("ds", "D#"),
+        ("e", "E"),
+        ("f", "F"),
+        ("fs", "F#"),
+        ("g", "G"),
+        ("gs", "G#"),
     )
     start_note = models.CharField(max_length=2,
                   choices=NOTES,
@@ -41,3 +41,10 @@ class Chord(models.Model):
 
     def __str__(self):
         return self.title + ' - ' + self.artist
+
+from django.forms import ModelForm
+
+class ChordForm(ModelForm):
+    class Meta:
+        model = Chord
+        fields = ['start_note']
