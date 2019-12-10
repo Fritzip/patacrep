@@ -1,21 +1,69 @@
 {% extends "patacrep/base_template.html" %}
+{% load static %}
 
 {% block pagetitle %}
   Index
 {% endblock %}
 
+{% block navbar_extra %}
+<form class="form-inline my-2 my-lg-0">
+  <input id="searchbar" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+</form>
+{% endblock navbar_extra %}
+
 {% block content %}
   {% for artist, chords in dartist.items %}
-    <span id="{{ artist }}" class="font-weight-bold mx-2">{{ artist }}</span>
-    {% for chord in chords %}
-      <li class="mx-2"><a href="{% url 'patacrep:detail' chord.id %}">{{ chord.title }}</a>
-        {% if chord.removed_content_confirmation or chord.warning_lines %}
-          <!-- <a href="{% url 'patacrep:confirm_remove' chord.id %}" class="badge badge-warning float-right mx-1">confirm</a> -->
+      <span><span id="{{ artist }}" class="font-weight-bold mx-2 artist">{{ artist }}</span>
+      {% for chord in chords %}
+        <li class="mx-2 chord" data-artist="{{artist}}"><a href="{% url 'patacrep:detail' chord.id %}">{{ chord.title }}</a>
+          {% if chord.removed_content_confirmation or chord.warning_lines %}
+            <!-- <a href="{% url 'patacrep:confirm_remove' chord.id %}" class="badge badge-warning float-right mx-1">confirm</a> -->
+          {% endif %}
+          {% if chord.favorite %}
+            <i class="fas fa-star float-right mx-1" style="color:yellow"></i>
+          {% endif %}
+        </li>
+        {% if forloop.first %}
+          </span>
         {% endif %}
-        {% if chord.favorite %}
-          <i class="fas fa-star float-right mx-1" style="color:yellow"></i>
-        {% endif %}
-      </li>
-    {% endfor %}
+      {% endfor %}
   {% endfor %}
+{% endblock %}
+
+
+{% block js %}
+
+<!-- jQuery -->
+<script src="{% static 'external/jquery-3.4.1.min.js' %}"></script>
+
+<script>
+  $(document).ready(function(){
+    $("#searchbar").on('input', function() {
+      var search = $(this).val();
+      $( ".artist" ).each(function() {
+        var resartist = $(this).text().match(new RegExp(search, 'i'));
+        if(resartist == null) {
+          var at_least_one = false;
+          $( '.chord[data-artist="'+$(this).attr('id')+'"]').each(function() {
+            var reschord = $(this).text().match(new RegExp(search, 'i'));
+            if (reschord == null) {
+              $(this).hide();
+            } else {
+              at_least_one = true;
+              $(this).show();
+            }
+          });
+          if (!at_least_one) {
+            $(this).hide();
+          }
+        } else { // match the artist, show every chord
+          $(this).show();
+          $( '.chord[data-artist="'+$(this).attr('id')+'"]').each(function() {
+            $(this).show();
+          });
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}
