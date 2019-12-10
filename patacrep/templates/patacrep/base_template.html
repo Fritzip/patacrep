@@ -47,7 +47,7 @@
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
             {% block options %}
             {% endblock options %}
-            <a class="dropdown-item" href="#">Default action</a>
+            <a class="dropdown-item" id="admin-chord" href="{% url 'admin:patacrep_chord_changelist' %}">ChordList Admin</a>
           </div>
         </div>
       </div>
@@ -77,10 +77,10 @@
   <!-- Menu Toggle Script -->
   <script>
     $(".sidebar").toggle(); 
-  $(".menu-toggle").click(function(e) {
-      e.preventDefault();
-      $(".sidebar").toggle(); 
-  });
+    $(".menu-toggle").click(function(e) {
+        e.preventDefault();
+        $(".sidebar").toggle(); 
+    });
   </script>
   <script>
     $(function() {

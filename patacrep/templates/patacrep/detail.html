@@ -6,14 +6,15 @@
 {% endblock %}
 
 {% block buttons %}
-  <a class="btn btn-primary" href="{% url 'patacrep:detail' rand %}"><i class="fas fa-random"></i></a>
   <a class="btn btn-primary" href="{% url 'patacrep:detail' prev %}"><i class="fas fa-angle-left"></i></a>
   <a class="btn btn-primary" href="{% url 'patacrep:detail' next %}"><i class="fas fa-angle-right"></i></a>
+  <a class="btn btn-primary" href="{% url 'patacrep:detail' rand %}"><i class="fas fa-random"></i></a>
 {% endblock %}
 
 {% block options %}
 <a class="dropdown-item" href="{% url 'patacrep:edit' chord.id %}">edit</a>
 <a class="dropdown-item" id="clean" chord_pk="{{chord.pk}}" href="#">clean</a>
+  <a class="dropdown-item" id="admin-chord" href="{% url 'admin:patacrep_chord_change' chord.id %}">Chord Admin</a>
 {% endblock options %}
 
 {% block infotab %}
