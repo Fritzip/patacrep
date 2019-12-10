@@ -84,7 +84,7 @@ a.website-name:hover {
   margin-right: auto;
 }
 
-.page-title * {
+.page-title > * {
   margin: 0px 5px;
 }
 

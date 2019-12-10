@@ -49,7 +49,6 @@ class ChordDetail(DetailView):
 
         self.object.content = '\n'.join(new_content)
 
-
         # Call the base implementation first to get a context
         context = super(ChordDetail, self).get_context_data(**kwargs)
         context['form'] = ChordForm
@@ -71,6 +70,14 @@ class ChordDetail(DetailView):
         context['next'] = next_id
         context['prev'] = prev_id
         context['rand'] = rand_id
+
+        qs_other_chord_of_artist = Chord.objects.filter(artist=self.object.artist).exclude(id=self.object.id)
+        other_chord_of_artist = []
+
+        for ch in qs_other_chord_of_artist:
+            other_chord_of_artist.append((ch.id, ch.title))
+
+        context['other_chords'] = other_chord_of_artist
 
         return context
 

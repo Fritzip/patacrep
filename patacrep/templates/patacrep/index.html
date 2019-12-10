@@ -42,13 +42,13 @@
       var search = $(this).val();
       $( ".artist" ).each(function() {
         var resartist = $(this).text().match(new RegExp(search, 'i'));
-        if(resartist == null) {
+        if(resartist == null) { // doesn't match the artist
           var at_least_one = false;
-          $( '.chord[data-artist="'+$(this).attr('id')+'"]').each(function() {
+          $( '.chord[data-artist="'+$(this).attr('id')+'"]').each(function() { // check for match in chords of the artist
             var reschord = $(this).text().match(new RegExp(search, 'i'));
-            if (reschord == null) {
+            if (reschord == null) { // chord doesn't match -> hide
               $(this).hide();
-            } else {
+            } else { // chord match -> show and do not hide artist
               at_least_one = true;
               $(this).show();
             }
