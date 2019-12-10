@@ -38,16 +38,18 @@
         {% endblock infotab %}
       </div>
       <div class="page-buttons">
-        {% block buttons %}
-        {% endblock buttons %}
-        <div class="dropdown">
-          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fas fa-cog"></i>
-          </button>
-          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
-            {% block options %}
-            {% endblock options %}
-            <a class="dropdown-item" id="admin-chord" href="{% url 'admin:patacrep_chord_changelist' %}">ChordList Admin</a>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Navigation">
+          {% block buttons %}
+          {% endblock buttons %}
+          <div class="btn-group" role="group">
+            <button class="btn btn-secondary dropdown-toggle btn-sm shadow-none" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fas fa-cog"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+              {% block options %}
+              {% endblock options %}
+              <a class="dropdown-item" id="admin-chord" href="{% url 'admin:patacrep_chord_changelist' %}"><i class="fas fa-database"></i> Chord List</a>
+            </div>
           </div>
         </div>
       </div>

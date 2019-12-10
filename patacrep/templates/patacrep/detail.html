@@ -2,19 +2,27 @@
 {% load static %}
 
 {% block pagetitle %}
-{{ chord.title }} - <small>{{ chord.artist }}</small>
+<span>{{ chord.title }}</span><small>{{ chord.artist }}</small>
 {% endblock %}
 
 {% block buttons %}
-  <a class="btn btn-primary" href="{% url 'patacrep:detail' prev %}"><i class="fas fa-angle-left"></i></a>
-  <a class="btn btn-primary" href="{% url 'patacrep:detail' next %}"><i class="fas fa-angle-right"></i></a>
-  <a class="btn btn-primary" href="{% url 'patacrep:detail' rand %}"><i class="fas fa-random"></i></a>
+  {% if prev %}
+  <a role="button" class="btn btn-primary" href="{% url 'patacrep:detail' prev %}"><i class="fas fa-angle-left"></i></a>
+  {% else %}
+  <a role="button" class="btn btn-primary disabled" href="#" aria-disabled="true"><i class="fas fa-angle-left"></i></a>
+  {% endif %}
+  <a role="button" class="btn btn-primary" href="{% url 'patacrep:detail' rand %}"><i class="fas fa-random"></i></a>
+  {% if next %}
+  <a role="button" class="btn btn-primary" href="{% url 'patacrep:detail' next %}"><i class="fas fa-angle-right"></i></a>
+  {% else %}
+  <a role="button" class="btn btn-primary disabled" href="#" aria-disabled="true"><i class="fas fa-angle-right"></i></a>
+  {% endif %}
 {% endblock %}
 
 {% block options %}
-<a class="dropdown-item" href="{% url 'patacrep:edit' chord.id %}">edit</a>
-<a class="dropdown-item" id="clean" chord_pk="{{chord.pk}}" href="#">clean</a>
-  <a class="dropdown-item" id="admin-chord" href="{% url 'admin:patacrep_chord_change' chord.id %}">Chord Admin</a>
+  <a class="dropdown-item" id="edit" href="{% url 'patacrep:confirm_remove' chord.id %}"><i class="fas fa-edit"></i> Edit</a>
+  <a class="dropdown-item" id="clean"><i class="fas fa-broom"></i> Clean</a>
+  <a class="dropdown-item" id="admin-chord" href="{% url 'admin:patacrep_chord_change' chord.id %}"><i class="fas fa-database"></i> Chord</a>
 {% endblock options %}
 
 {% block infotab %}
@@ -23,19 +31,20 @@
   {% else %}
       <i class="far fa-star"></i>
   {% endif %}
-  {% if chord.capo > 0 %}
-      <span>Capo {{ chord.capo }}</span>
-  {% endif %}
-
-  <select class="form-control form-control-sm p-0" id="start-note-selector">
-    {% for value, text in form.start_note.field.choices %}
-      {% if value == chord.start_note %}
-        <option selected="{{ value }}">{{text}}</option>
-      {% else %}
-        <option value="{{ value }}">{{text}}</option>
-      {% endif %}
-    {% endfor %}
-  </select>
+  <div class="flex-col">
+    {% if chord.capo > 0 %}
+        <span>Capo {{ chord.capo }}</span>
+    {% endif %}
+    <select class="form-control form-control-sm p-0" id="start-note-selector">
+      {% for value, text in form.start_note.field.choices %}
+        {% if value == chord.start_note %}
+          <option selected="{{ value }}">{{text}}</option>
+        {% else %}
+          <option value="{{ value }}">{{text}}</option>
+        {% endif %}
+      {% endfor %}
+    </select>
+  </div>
 {% endblock infotab %}
 
 
@@ -50,6 +59,10 @@
 {% block js %}
   <!-- jQuery -->
   <script src="{% static 'external/jquery-3.4.1.min.js' %}"></script>
+
+  <!-- NoSleep -->
+  <!-- <script src="{% static 'external/noSleep-0.9.0.min.js' %}"></script> -->
+
 
   <script>
     $(document).ready(function(){
@@ -67,7 +80,7 @@
       $(document).on('click', '.fa-star', function(){
         var star = $(this);
         $.ajax({
-          url: '{% url "patacrep:toggle_favorite" %}',
+          url: '{% url "patacrep:ajax_toggle_favorite" %}',
           type: "POST",
           data: {
               csrfmiddlewaretoken: '{{ csrf_token }}',
@@ -75,6 +88,7 @@
           },
           dataType: 'json',
           success: function (data) {
+            // todo notification
             if (data.added) {
               $(star).attr('data-prefix', 'fas');
               $(star).css('color', 'yellow');
@@ -89,7 +103,7 @@
       $(document).on('change', '#start-note-selector', function() {
         var new_start_note_value = $('#start-note-selector').find(":selected").attr('value');
         $.ajax({
-          url: '{% url "patacrep:change_start_note" %}',
+          url: '{% url "patacrep:ajax_change_start_note" %}',
           type: "POST",
           data: {
               csrfmiddlewaretoken: '{{ csrf_token }}',
@@ -99,6 +113,21 @@
           dataType: 'json',
           success: function (data) {
             // todo notification
+          }
+        });
+      });
+
+      $(document).on('click', '#clean', function(){
+        $.ajax({
+          url: '{% url "patacrep:ajax_clean_chord" %}',
+          type: "POST",
+          data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              'chord_pk': '{{chord.pk}}'
+          },
+          dataType: 'json',
+          success: function (data) {
+            window.location.href = '{% url "patacrep:detail" 0 %}'.replace('0', data.pkid);
           }
         });
       });
@@ -128,26 +157,5 @@
       });
     });
   </script>
-  <script>
-    $("#clean").click(function () {
-      var chord_pk = $(this).attr("chord_pk");
-      $.ajax({
-        url: '{% url "patacrep:ajax_clean" %}',
-        type: "POST",
-        data: {
-            csrfmiddlewaretoken: '{{ csrf_token }}',
-            'chord_pk': chord_pk
-        },
-        dataType: 'json',
-        success: function (data) {
-          // console.log(data.pkid);
-          window.location.href = '{% url "patacrep:detail" 0 %}'.replace('0', data.pkid);
-          // location.href = "http://www.example.com/ThankYou.html"; 
-          // if (data.is_taken) {
-          //   alert("Successfully modified : " + data.pkid);
-          // }
-        }
-      });
-    });
-  </script>
+
 {% endblock js %}

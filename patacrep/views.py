@@ -39,6 +39,16 @@ class ChordDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         self.object.content = format_content(self.object.content)
+        
+        rcc = self.object.removed_content_confirmation.split(', ')
+
+        new_content = []
+        for i, line in enumerate(self.object.content.split('\n')):
+            if str(i) not in rcc:
+                new_content.append(line)
+
+        self.object.content = '\n'.join(new_content)
+
 
         # Call the base implementation first to get a context
         context = super(ChordDetail, self).get_context_data(**kwargs)
@@ -84,41 +94,49 @@ def change_start_note(request):
     data = {}
     return JsonResponse(data)
 
-def edit(request, chord_id):
-    chord = get_object_or_404(Chord, pk=chord_id)
-    return render(request, 'patacrep/edit.html', {'chord': chord})
+def clean(request):
+    chord_pk = request.POST['chord_pk']
+    clean_chord(chord_pk)
+    
+    data = {
+        'pkid': chord_pk
+    }
+    return JsonResponse(data)
+
+
+def save_edit(request):
+    rm_lines = request.POST.getlist('rm_lines[]')
+    chord_pk = request.POST['chord_pk']
+
+    Chord.objects.filter(pk=chord_pk).update(removed_content_confirmation=", ".join(rm_lines))
+    data = {
+        'pkid': chord_pk
+    }
+    return JsonResponse(data)
 
 def confirm_remove(request, chord_id):
     chord = get_object_or_404(Chord, pk=chord_id)
 
-    # print(chord.removed_content_confirmation.split(', '))
     rcc = chord.removed_content_confirmation.split(', ')
-    # print(chord.warning_lines.split(', '))
     wl = chord.warning_lines.split(', ')
-    # print(rcc)
-    # print(wl)
-    # rcc = [0, 1, 2, 8, 9]
-    # wl = [4, 6, 7]
+
     modified_lines = []
     for i, line in enumerate(chord.content.split('\n')):
         if str(i) in rcc:
             modified_lines.append((i, line, True, False))
-            # print("D : ", line)
         elif str(i) in wl:
             modified_lines.append((i, line, False, True))
-            # print("M : ", line)
         else:
             modified_lines.append((i, line, False, False))
-            # print("    ", line)
-
-    # print(modified_lines)
-    # for line in chord.removed_content_confirmation.split('\n'):
-    #     i += 1
-    # for line in chord.content.split('\n'):
-    #     delete_lines.append((i, line, False))
-    #     i += 1
 
     return render(request, 'patacrep/confirm_remove.html', {'chord': chord, 'modified_lines': modified_lines})
+
+###########################################
+# WIP
+
+def edit(request, chord_id):
+    chord = get_object_or_404(Chord, pk=chord_id)
+    return render(request, 'patacrep/edit.html', {'chord': chord})
 
 def next(request):
     chord_pk = request.POST['chord_pk']
@@ -168,23 +186,3 @@ def save_and_next(request):
     }
     return JsonResponse(data)
 
-def clean(request):
-    chord_pk = request.POST['chord_pk']
-    clean_chord(chord_pk)
-    
-    # json response
-    data = {
-        'pkid': chord_pk
-    }
-    return JsonResponse(data)
-
-def save_edit(request):
-    modified_content = request.GET.get('modified_content', None)
-    chord_pk = request.GET.get('chord_pk', None)
-
-    Chord.objects.filter(pk=chord_pk).update(content=modified_content.rstrip())
-    Chord.objects.filter(pk=chord_pk).update(edited=True)
-    data = {
-        'pkid': chord_pk
-    }
-    return JsonResponse(data)

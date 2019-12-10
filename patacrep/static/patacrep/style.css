@@ -75,16 +75,24 @@ a.website-name:hover {
 }
 
 .page-title {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: baseline;
   font-size: 24px;
   padding: 5px 10px;
   margin-left: auto;
+  margin-right: auto;
+}
+
+.page-title * {
+  margin: 0px 5px;
 }
 
 .page-buttons {
   display: flex;
   flex-flow: row wrap;
   margin-right: 10px;
-  margin-left: auto;
+  /*margin-left: auto;*/
   align-items: center;
 }
 
@@ -126,18 +134,33 @@ a.website-name:hover {
   border-right: 1px dashed #333;
 }
 
-#start-note-selector {
+#start-note-selector, #start-note-selector * {
   width: fit-content;
   height: fit-content;
+  background-color: #dadae0;
+  color: #39325d;
+  /*border: 2px solid #dadae0;*/
+  border: 0px;
+  font-family: inherit;
 }
 
 .infotab {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  margin-right: auto;
+  /*margin-right: auto;*/
 }
 
-.infotab * {
+.infotab > * {
   margin:5px;
+}
+
+.content > #edit-chord-container {
+  overflow-y: auto;
+}
+
+.flex-col {
+  display: flex;
+  width: max-content;
+  flex-flow: column nowrap;
 }
