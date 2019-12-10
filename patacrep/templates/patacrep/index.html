@@ -13,16 +13,16 @@
 
 {% block content %}
   {% for artist, chords in dartist.items %}
-      <span><span id="{{ artist }}" class="font-weight-bold mx-2 artist">{{ artist }}</span>
+      <span class="artist-header"><span id="{{ artist }}" class="font-weight-bold artist">{{ artist }}</span>
       {% for chord in chords %}
-        <li class="mx-2 chord" data-artist="{{artist}}"><a href="{% url 'patacrep:detail' chord.id %}">{{ chord.title }}</a>
+        <span class="chord {% if forloop.last %}bottom-rounded{%endif%}" data-artist="{{artist}}"><a href="{% url 'patacrep:detail' chord.id %}">{{ chord.title }}</a>
           {% if chord.removed_content_confirmation or chord.warning_lines %}
             <!-- <a href="{% url 'patacrep:confirm_remove' chord.id %}" class="badge badge-warning float-right mx-1">confirm</a> -->
           {% endif %}
           {% if chord.favorite %}
-            <i class="fas fa-star float-right mx-1" style="color:yellow"></i>
+            <i class="fas fa-star mx-1" style="color:yellow"></i>
           {% endif %}
-        </li>
+        </span>
         {% if forloop.first %}
           </span>
         {% endif %}
@@ -63,6 +63,29 @@
           });
         }
       });
+    });
+
+    $(".artist-list").bind('click',function(event){
+        var artist = $(this).data("artist");
+        var $artist = $('.artist[id="'+artist+'"]');
+        var $chord = $( '.chord[data-artist="'+artist+'"]');
+
+        $('.content').stop().animate({
+            scrollLeft: '+='+($artist.offset().left - $('.sidebar').width() - 5)
+        }, 600);
+
+        $artist.addClass('anchor');
+        $chord.each(function() {
+          $(this).addClass('anchor');
+        });
+
+        setTimeout( function() {
+          $chord.each(function() {
+            $(this).removeClass('anchor');
+          });
+          $artist.removeClass('anchor');
+        }, 2000);
+        event.preventDefault();
     });
   });
 </script>

@@ -12,19 +12,6 @@
   <!-- <link rel="stylesheet" href="{% static 'patacrep/style-dark.css' %}"> -->
   
   <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
-  
-  <!-- jQuery -->
-  <script src="{% static 'external/jquery-3.4.1.min.js' %}"></script>
-
-  <!-- Bootstrap -->
-  <script src="{% static 'external/bootstrap-4.3.1/js/bootstrap.bundle.min.js' %}"></script>
-
-  <!-- Font awesome -->
-  <script src="{% static 'external/fontawesome-5.11.2/js/all.min.js' %}"></script>
-
-  {% block js %}
-  {% endblock %}
-
 </head>
 
 <body>
@@ -61,7 +48,7 @@
         <!-- <ul class="sidebar-nav"> -->
           <div id="list-example" class="list-group">
             {% for artist in artist_list %}
-              <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-0" href="{% url 'patacrep:index' %}#{{ artist.0 }}">{{ artist.0 }}
+              <a class="artist-list list-group-item list-group-item-action d-flex justify-content-between align-items-center py-0" data-artist="{{artist.0}}" href="{% url 'patacrep:index' %}#{{ artist.0 }}">{{ artist.0 }}
               <span class="badge badge-primary badge-pill">{{ artist.1 }}</span></a>
             {% endfor %}
           </div>
@@ -78,19 +65,34 @@
   </div>
 </body>
 
-  <!-- Menu Toggle Script -->
+  <!-- jQuery -->
+  <script src="{% static 'external/jquery-3.4.1.min.js' %}"></script>
+
+  <!-- Bootstrap -->
+  <script src="{% static 'external/bootstrap-4.3.1/js/bootstrap.bundle.min.js' %}"></script>
+
+  <!-- Font awesome -->
+  <script src="{% static 'external/fontawesome-5.11.2/js/all.min.js' %}"></script>
+
+  {% block js %}
+  {% endblock %}
+
   <script>
-    $(".sidebar").toggle(); 
-    $(".menu-toggle").click(function(e) {
-        e.preventDefault();
-        $(".sidebar").toggle(); 
+    $(document).ready(function(){
+      $(".sidebar").toggle(); 
+      $(".menu-toggle").click(function(e) {
+          e.preventDefault();
+          $(".sidebar").toggle(); 
+      });
     });
   </script>
+  
   <script>
-    $(function() {
+    $(document).ready(function(){
       $('.content').bind('mousewheel', function(e){ 
         this.scrollLeft -= e.originalEvent.wheelDelta;
       });
     });
   </script>
+
 </html>
