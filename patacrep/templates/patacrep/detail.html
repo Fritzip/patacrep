@@ -2,9 +2,14 @@
 {% load static %}
 
 {% block pagetitle %}
+{% if chord.favorite %}
+    <i class="fas fa-star" style="color:yellow"></i>
+{% else %}
+    <i class="far fa-star"></i>
+{% endif %}
 <span>{{ chord.title }}</span>
 <div class="dropdown">
-  <button type="button" class="btn btn-outline-light dropdown-toggle shadow-none" id="dropdownChordsOfArtist" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+  <button type="button" class="btn btn-sm btn-outline-light dropdown-toggle shadow-none" id="dropdownChordsOfArtist" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     {{ chord.artist }}
   </button>
   <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownChordsOfArtist">
@@ -30,22 +35,25 @@
 {% endblock %}
 
 {% block options %}
-  <a class="dropdown-item" id="edit" href="{% url 'patacrep:confirm_remove' chord.id %}"><i class="fas fa-edit"></i> Edit</a>
-  <a class="dropdown-item" id="clean"><i class="fas fa-broom"></i> Clean</a>
-  <a class="dropdown-item" id="admin-chord" href="{% url 'admin:patacrep_chord_change' chord.id %}"><i class="fas fa-database"></i> Chord</a>
+  {% if user.is_superuser %}
+    <a class="dropdown-item option-dropdown" id="edit" href="{% url 'patacrep:confirm_remove' chord.id %}"><i class="fas fa-edit"></i> Edit</a>
+    <a class="dropdown-item option-dropdown" id="clean"><i class="fas fa-broom"></i> Clean</a>
+    <a class="dropdown-item option-dropdown" id="admin-chord" href="{% url 'admin:patacrep_chord_change' chord.id %}"><i class="fas fa-database"></i> Chord</a>
+  {% endif %}
 {% endblock options %}
 
 {% block infotab %}
-  {% if chord.favorite %}
-      <i class="fas fa-star" style="color:yellow"></i>
-  {% else %}
-      <i class="far fa-star"></i>
-  {% endif %}
-  <div class="flex-col">
-    {% if chord.capo > 0 %}
-        <span>Capo {{ chord.capo }}</span>
-    {% endif %}
-    <select class="form-control form-control-sm p-0" id="start-note-selector">
+  <div class="input-group">
+    <div class="input-group-prepend" data-toggle="tooltip" data-placement="left" title="Capo">
+      <label class="input-group-text"><i class="icon-capo"></i></label>
+    </div>
+    <input type="number" class="form-control shadow-none" min="0" step="1" id="capo-selector" aria-label="Capo" value="{% if chord.capo < 0%}0{% else %}{{chord.capo}}{% endif %}" />
+  </div>
+  <div class="input-group">
+    <div class="input-group-prepend" data-toggle="tooltip" data-placement="left" data-html="true" title="1<sup>st</sup> note">
+      <label class="input-group-text" for="start-note-selector"><i class="icon-music-note"></i></label>
+    </div>
+    <select class="form-control shadow-none" id="start-note-selector">
       {% for value, text in form.start_note.field.choices %}
         {% if value == chord.start_note %}
           <option selected="{{ value }}">{{text}}</option>
@@ -67,12 +75,7 @@
 {% endblock %}
 
 {% block js %}
-  <!-- jQuery -->
-  <script src="{% static 'external/jquery-3.4.1.min.js' %}"></script>
-
-  <!-- NoSleep -->
-  <!-- <script src="{% static 'external/noSleep-0.9.0.min.js' %}"></script> -->
-
+{{ block.super }}
 
   <script>
     $(document).ready(function(){
@@ -87,6 +90,7 @@
   <script>
     // Favorite toggle (star)
     $(document).ready(function() {
+
       $(document).on('click', '.fa-star', function(){
         var star = $(this);
         $.ajax({

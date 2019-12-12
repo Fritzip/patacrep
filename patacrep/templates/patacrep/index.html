@@ -32,10 +32,7 @@
 
 
 {% block js %}
-
-<!-- jQuery -->
-<script src="{% static 'external/jquery-3.4.1.min.js' %}"></script>
-
+{{block.super}}
 <script>
   $(document).ready(function(){
     $("#searchbar").on('input', function() {

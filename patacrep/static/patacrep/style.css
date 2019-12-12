@@ -1,37 +1,8 @@
-@font-face {
-  font-family: Grand Hotel;
-  src: local("GrandHotel-Regular"),
-       url(GrandHotel-Regular.ttf);
-}
-
-@font-face {
-  font-family: Roboto;
-  src: local("Roboto-Regular"),
-       url(Roboto-Regular.ttf);
-}
-
-@font-face {
-  font-family: RobotoMono;
-  src: local("RobotoMono-Regular"),
-       url(RobotoMono-Regular.ttf);
-}
-
-@font-face {
-  font-family: SourceSansPro;
-  src: local("SourceSansPro-Regular"),
-       url(SourceSansPro-Regular.ttf);
-}
-
-@font-face {
-  font-family: SourceCodePro;
-  src: local("SourceCodePro-Regular"),
-       url(SourceCodePro-Regular.ttf);
-}
-
 html,
 body {
   height: 100%;
   font-family: SourceSansPro;
+  line-height: 1.1;
 }
 
 span {
@@ -50,36 +21,46 @@ span {
 
 .header {
     display: flex;
-    flex-flow: row;
+    flex-flow: row wrap;
+    /*overflow: hidden;*/
     flex: 0 1 auto;
-    align-items: center;
+    align-items: stretch;
     background-color: #39325d;
     color: #dadae0;
+    padding: 5px 10px;
+}
+
+.header > * {
+  margin: 0px 5px;
 }
 
 .menu-toggle {
-  margin-left: 10px;
+  /*margin-left: 10px;*/
   color: unset;
+  font-size: 18px;
+  margin-top:auto;
+  margin-bottom:auto;
 }
 
 a.website-name {
   font-family: Grand Hotel;
   font-size: 34px;
-  padding: 5px 10px;
+  align-self: center;
+  /*padding: 5px 10px;*/
   color: unset;
 }
 
-a.website-name:hover {
-  color:#b2b2ff;
+a.website-name:hover, .menu-toggle:hover, .fa-star:hover {
+  color:#fbff4b;
   text-decoration: none;
 }
 
 .page-title {
   display: flex;
   flex-flow: row wrap;
-  align-items: baseline;
+  align-items: center;
   font-size: 24px;
-  padding: 5px 10px;
+  /*padding: 5px 10px;*/
   margin-left: auto;
   margin-right: auto;
 }
@@ -88,16 +69,21 @@ a.website-name:hover {
   margin: 0px 5px;
 }
 
+.page-title > svg {
+  font-size: 14px;
+  margin-right: 0px;
+}
+
 .page-buttons {
   display: flex;
   flex-flow: row wrap;
-  margin-right: 10px;
+  /*margin-right: 10px;*/
   /*margin-left: auto;*/
   align-items: center;
 }
 
 .page-buttons > a, .page-buttons > div  {
-  margin: 5px;
+  /*margin: 5px;*/
   display: flex;
   align-items: center; 
 }
@@ -139,6 +125,7 @@ a.website-name:hover {
 
 .sidebar {
   display: flex;
+  display: none;
   flex-flow: column;
   flex: 1 1 auto;
   overflow-y: auto;
@@ -151,7 +138,7 @@ a.website-name:hover {
   overflow-y: hidden;
   overflow-x: auto;
   /* top | horizontal | bottom */
-  padding: 1em 1em 2px;
+  padding: 1em 1em 0px;
 }
 
 .chordline {
@@ -163,25 +150,48 @@ a.website-name:hover {
   border-right: 1px dashed #333;
 }
 
-#start-note-selector, #start-note-selector * {
-  width: fit-content;
-  height: fit-content;
-  background-color: #dadae0;
-  color: #39325d;
-  /*border: 2px solid #dadae0;*/
-  border: 0px;
-  font-family: inherit;
-}
-
 .infotab {
   display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  /*margin-right: auto;*/
+  flex-direction: column;
+  flex: 0 0 50px;
+  justify-content: center;
 }
 
+
 .infotab > * {
-  margin:5px;
+  margin:1px;
+}
+
+
+#start-note-selector, #start-note-selector *, #capo-selector {
+  background-color: #dadae0;
+  color: #39325d;
+  font-family: inherit;
+  padding: 0px 2px;
+  font-size: 14px;
+  text-align: center;
+  text-align-last:center;
+}
+
+.input-group {
+  flex-wrap: nowrap;
+}
+
+.input-group-text {
+  padding:1px 3px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button,
+.form-control {
+  -webkit-appearance: none;
+  margin: 0;
+  height: unset;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance:textfield;
 }
 
 .content > #edit-chord-container {
@@ -192,4 +202,15 @@ a.website-name:hover {
   display: flex;
   width: max-content;
   flex-flow: column nowrap;
+  align-items: center;
+  border-radius: 5px;
+  background-color: rgba(245,245,245,0.2);
+  /*padding : 2px 5px;*/
+}
+
+.flex-col > * {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: 0;
 }

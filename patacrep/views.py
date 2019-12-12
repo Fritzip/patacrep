@@ -81,6 +81,9 @@ class ChordDetail(DetailView):
 
         return context
 
+from django.contrib.auth.decorators import login_required
+
+@login_required
 def toggle_favorite(request):
     chord_pk = request.POST['chord_pk']
     chord = get_object_or_404(Chord, pk=chord_pk)
@@ -92,6 +95,7 @@ def toggle_favorite(request):
     }
     return JsonResponse(data)
 
+@login_required
 def change_start_note(request):
     chord_pk = request.POST['chord_pk']
     chord = get_object_or_404(Chord, pk=chord_pk)
@@ -101,6 +105,7 @@ def change_start_note(request):
     data = {}
     return JsonResponse(data)
 
+@login_required
 def clean(request):
     chord_pk = request.POST['chord_pk']
     clean_chord(chord_pk)
@@ -110,7 +115,7 @@ def clean(request):
     }
     return JsonResponse(data)
 
-
+@login_required
 def save_edit(request):
     rm_lines = request.POST.getlist('rm_lines[]')
     chord_pk = request.POST['chord_pk']
@@ -121,6 +126,7 @@ def save_edit(request):
     }
     return JsonResponse(data)
 
+@login_required
 def confirm_remove(request, chord_id):
     chord = get_object_or_404(Chord, pk=chord_id)
 
