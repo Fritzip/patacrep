@@ -2,7 +2,10 @@
 {% load static %}
 
 {% block pagetitle %}
-<span>{{ chord.title }}</span><small>{{ chord.artist }}</small>
+<span>{{ chord.title }}</span>
+<button type="button" class="btn btn-sm btn-outline-light shadow-none">
+  {{ chord.artist }}
+</button>
 {% endblock %}
 
 {% block buttons %}
@@ -18,7 +21,7 @@
 <!-- <span> -->
   <div id="edit-chord-container" class="list-group">
       {% for line in modified_lines %}
-        <button type="button" id="{{ line.0 }}" class="del_line list-group-item py-0 border-0 {% if line.2 %}list-group-item-danger{% elif line.3 %}list-group-item-warning{% endif %} text-left" style="font-family:Courier; font-size: 75%;white-space:pre; display: inline-block; outline: none !important; box-shadow: none;"> {{ line.1 }}</button>
+        <button type="button" id="{{ line.0 }}" class="del-line list-group-item py-0 border-0 {% if line.2 %}list-group-item-danger{% elif line.3 %}list-group-item-warning{% endif %} text-left"> {{ line.1 }}</button>
       {% endfor %}
   </div>
 
@@ -29,12 +32,10 @@
 
 
 {% block js %}
-  <!-- jQuery -->
-  <script src="{% static 'external/jquery-3.4.1.min.js' %}"></script>
-
+{{ block.super }}
   <script>
     $(document).ready(function() {
-      $('.del_line').click(function(e){
+      $('.del-line').click(function(e){
         e.target.classList.toggle("list-group-item-danger");
       });
 
@@ -69,7 +70,7 @@
     $("#save_and_next").click(function () {
       var chord_pk = $(this).attr("chord_pk");
       var modified_content = "" ;
-      $( ".del_line" ).each(function( index, e ) {
+      $( ".del-line" ).each(function( index, e ) {
         if (!$( e ).hasClass("list-group-item-danger") ) {
           modified_content = modified_content.concat($(e).text(), '\n');
         }

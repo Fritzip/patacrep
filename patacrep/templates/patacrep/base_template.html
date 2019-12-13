@@ -82,10 +82,9 @@
   {% block js %}
   <script>
     $(document).ready(function(){
-      // $(".sidebar").toggle(); 
       $(".menu-toggle").click(function(e) {
           e.preventDefault();
-          $(".sidebar").toggle(); 
+          $(".sidebar").toggle();
       });
       if ($(".option-dropdown").length == 0) {
         $('#option-btn').hide();

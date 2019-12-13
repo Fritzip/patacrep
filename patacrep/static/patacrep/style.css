@@ -69,6 +69,15 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover {
   margin: 0px 5px;
 }
 
+.del-line {
+  font-family:SourceCodePro;
+  font-size: 75%;
+  white-space:pre;
+  display: inline-block;
+  outline: none !important;
+  box-shadow: none;
+}
+
 .page-title > svg {
   font-size: 14px;
   margin-right: 0px;

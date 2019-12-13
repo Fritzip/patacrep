@@ -13,9 +13,9 @@
 
 {% block content %}
   {% for artist, chords in dartist.items %}
-      <span class="artist-header"><span id="{{ artist | slugify }}" class="font-weight-bold artist">{{ artist }}</span>
+      <span class="artist-header"><span class="font-weight-bold artist" id="{{ artist | slugify }}">{{ artist }}</span>
       {% for chord in chords %}
-        <span class="chord {% if forloop.last %}bottom-rounded{%endif%}" name="{{artist | slugify}}" data-artist="{{artist | slugify }}"><a href="{% url 'patacrep:detail' chord.id %}">{{ chord.title }}</a>
+        <span class="chord {% if forloop.last %}bottom-rounded{%endif%}" data-artist="{{artist | slugify }}"><a href="{% url 'patacrep:detail' chord.id %}">{{ chord.title }}</a>
           {% if chord.removed_content_confirmation or chord.warning_lines %}
             <!-- <a href="{% url 'patacrep:confirm_remove' chord.id %}" class="badge badge-warning float-right mx-1">confirm</a> -->
           {% endif %}
@@ -38,24 +38,26 @@
     $("#searchbar").on('input', function() {
       var search = $(this).val();
       $( ".artist" ).each(function() {
-        var resartist = $(this).text().match(new RegExp(search, 'i'));
+        var $artist = $(this);
+        var resartist = $artist.text().match(new RegExp(search, 'i'));
         if(resartist == null) { // doesn't match the artist
           var at_least_one = false;
-          $( '.chord[data-artist="'+$(this).attr('id')+'"]').each(function() { // check for match in chords of the artist
-            var reschord = $(this).text().match(new RegExp(search, 'i'));
+          $( '.chord[data-artist="'+$artist.attr('id')+'"]').each(function() { // check for match in chords of the artist
+            var $chord = $(this);
+            var reschord = $chord.text().match(new RegExp(search, 'i'));
             if (reschord == null) { // chord doesn't match -> hide
-              $(this).hide();
+              $chord.hide();
             } else { // chord match -> show and do not hide artist
               at_least_one = true;
-              $(this).show();
+              $chord.show();
             }
           });
           if (!at_least_one) {
-            $(this).hide();
+            $artist.hide();
           }
         } else { // match the artist, show every chord
-          $(this).show();
-          $( '.chord[data-artist="'+$(this).attr('id')+'"]').each(function() {
+          $artist.show();
+          $( '.chord[data-artist="'+$artist.attr('id')+'"]').each(function() {
             $(this).show();
           });
         }
