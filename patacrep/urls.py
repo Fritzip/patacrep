@@ -23,11 +23,4 @@ urlpatterns = [
     #url(r'^save_edit/$', views.save_edit, name='save_edit'),
     # url(r'^ajax/save_edit/$', views.save_edit, name='save_edit'),
     # path('<int:chord_id>/<str:npr>/', views.nextprevrand, name='nextprevrand'),
-
-    # Auth related urls
-    path('accounts/', include('django.contrib.auth.urls')), # new
-    # url(r'^accounts/login/$', auth_views.LoginView.as_view(template_name='patacrep/login.html'), name='login'),
-
-    # url(r'^logout$', views.LogoutView, { 'next_page': '/', }, name='logout'),
-
 ]
