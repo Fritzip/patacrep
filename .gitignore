@@ -1,7 +1,9 @@
-db.sqlite3
+#db.sqlite3
 *.pyc
 *.swp
+migrations/
+/static/
 patacrep/data/
-patacrep/static/external/
+#patacrep/static/external/
 venv/
 *.sublime-*

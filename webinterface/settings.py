@@ -25,8 +25,8 @@ SECRET_KEY = '=xv9^lrly744uk-c$^9!w_6%(^8q1gk=#^f9qmfmw$d_-fmmap'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['0.0.0.0','127.0.0.1','localhost','farges.ddns.net','192.168.1.18']
+INTERNAL_IPS = ('0.0.0.0','127.0.0.1','localhost',)
 
 # Application definition
 
@@ -129,7 +129,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# https://docs.djangoproject.com/en/1.8/howto/static-files/deployment/
+# python manage.py collectstatic
+STATIC_ROOT = BASE_DIR + '/static/'
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
     # '/var/www/static/',
 ]
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
+)
