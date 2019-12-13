@@ -24,7 +24,7 @@ def index(request):
 
     context = {'dartist': dartist, 'nb_chords':Chord.objects.count()}
 
-    if request.method == 'POST' and 'update' in request.POST:
+    if request.method == 'POST' and 'update' in request.POST and request.user.is_superuser:
             output = update_all() 
             output['new_to_db'] = [get_chord_name_from_id(pkid) for pkid in output['new_to_db']]
             output['already_in_db'] = [get_chord_name_from_id(pkid) for pkid in output['already_in_db']]
@@ -83,26 +83,48 @@ class ChordDetail(DetailView):
 
 from django.contrib.auth.decorators import login_required
 
-@login_required
 def toggle_favorite(request):
-    chord_pk = request.POST['chord_pk']
-    chord = get_object_or_404(Chord, pk=chord_pk)
-    chord.favorite = not chord.favorite
-    chord.save()
+    success = False
+    added = False
+    message = ""
+    if request.user.is_superuser:
+        chord_pk = request.POST['chord_pk']
+        chord = get_object_or_404(Chord, pk=chord_pk)
+        chord.favorite = not chord.favorite
+        added = chord.favorite
+        chord.save()
+        success = True
+        if chord.favorite:
+            message = "Successfully added to favorite"
+        else:
+            message = "Successfully removed from favorite"
+    else:
+        message = "You need admin privilege for that"
 
     data = {
-        'added': chord.favorite
+        'added' : added,
+        'success' : success,
+        'message': message
     }
     return JsonResponse(data)
 
-@login_required
 def change_start_note(request):
-    chord_pk = request.POST['chord_pk']
-    chord = get_object_or_404(Chord, pk=chord_pk)
-    chord.start_note = request.POST['new_start_note']
-    chord.save()
-
-    data = {}
+    success = False
+    message = ""
+    if request.user.is_superuser:
+        chord_pk = request.POST['chord_pk']
+        print(chord_pk)
+        chord = get_object_or_404(Chord, pk=chord_pk)
+        chord.start_note = request.POST['new_start_note']
+        chord.save()
+        message = "New start note set to : {}".format(chord.get_start_note_display())
+        success = True
+    else:
+        message = "You need admin privilege for that"
+    data = {
+        'success': success,
+        'message': message,
+    }
     return JsonResponse(data)
 
 @login_required

@@ -91,6 +91,21 @@
     // Favorite toggle (star)
     $(document).ready(function() {
 
+      var settings = {
+        element: 'body',
+        placement: {
+          from: 'bottom',
+          align: 'right'
+        },
+        allow_dismiss: true,
+        newest_on_top: false,
+        
+        delay: 3000,
+        template: '<div data-notify="container" class="alert alert-{0}" role="alert">' +
+          '<span data-notify="message">{2}</span>' +
+        '</div>' 
+      };
+
       $(document).on('click', '.fa-star', function(){
         var star = $(this);
         $.ajax({
@@ -102,20 +117,28 @@
           },
           dataType: 'json',
           success: function (data) {
-            // todo notification
-            if (data.added) {
-              $(star).attr('data-prefix', 'fas');
-              $(star).css('color', 'yellow');
-            } else {
-              $(star).attr('data-prefix', 'far');
-              $(star).css('color', 'unset');
+            if(data['success']) {
+              if (data['added']) {
+                $(star).attr('data-prefix', 'fas');
+                $(star).css('color', 'yellow');
+              } else {
+                $(star).attr('data-prefix', 'far');
+                $(star).css('color', 'unset');
+              }
             }
+            var notiftype = data['success'] ? 'success' : 'warning';
+            var notif = $.notify({
+              message: data['message'],
+            }, $.extend(settings,{type:notiftype}));
+            notif.$ele.on('click', function() {
+              notif.close();
+            });
           }
         });
       });
 
       $(document).on('change', '#start-note-selector', function() {
-        var new_start_note_value = $('#start-note-selector').find(":selected").attr('value');
+        var new_start_note_value = $('#start-note-selector').val();
         $.ajax({
           url: '{% url "patacrep:ajax_change_start_note" %}',
           type: "POST",
@@ -126,7 +149,13 @@
           },
           dataType: 'json',
           success: function (data) {
-            // todo notification
+            var notiftype = data['success'] ? 'success' : 'warning';
+            var notif = $.notify({
+              message: data['message'],
+            }, $.extend(settings,{type:notiftype}));
+            notif.$ele.on('click', function() {
+              notif.close();
+            });
           }
         });
       });
