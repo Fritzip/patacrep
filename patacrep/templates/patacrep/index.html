@@ -52,7 +52,9 @@
               $chord.show();
             }
           });
-          if (!at_least_one) {
+          if (at_least_one) {
+            $artist.show();
+          } else {
             $artist.hide();
           }
         } else { // match the artist, show every chord
@@ -90,7 +92,9 @@
     }
 
     var hash = window.location.hash.substr(1);
-    anchor_highlight(hash);
+    if (hash) {
+      anchor_highlight(hash);
+    }
 
     $(".artist-list").bind('click',function(event){
         var artist = $(this).data("artist");
