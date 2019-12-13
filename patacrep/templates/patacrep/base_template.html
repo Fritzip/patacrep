@@ -54,40 +54,18 @@
     </div>
     <div class="content-wrapper">
       <nav class="sidebar">
-        <!-- <ul class="sidebar-nav"> -->
           <div id="list-example" class="list-group">
             {% for artist in artist_list %}
-              <a class="artist-list list-group-item list-group-item-action d-flex justify-content-between align-items-center py-0" data-artist="{{artist.0}}" href="{% url 'patacrep:index' %}#{{ artist.0 | slugify }}">{{ artist.0 }}
+              <a class="artist-list list-group-item list-group-item-action d-flex justify-content-between align-items-center py-0" data-artist="{{artist.0 | slugify}}" href="{% url 'patacrep:index' %}#{{ artist.0 | slugify }}">{{ artist.0 }}
               <span class="badge badge-primary badge-pill">{{ artist.1 }}</span></a>
             {% endfor %}
           </div>
-        <!-- </ul> -->
       </nav>
       <div class="content">
-          <!-- Position it -->
-          <div style="position: absolute; top: 10%; right: 10%;">
-
-            <!-- Then put toasts within -->
-            <div class="toast" role="alert" data-delay="5000" aria-live="assertive" aria-atomic="true">
-              <div class="toast-header">
-                <strong class="mr-auto">Bootstrap</strong>
-                <small class="text-muted">just now</small>
-                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="toast-body">
-                See? Just like this.
-              </div>
-            </div>
-          </div>
         {% block content %}
         {% endblock %}
       </div>
     </div>
-    <!-- <div class="footer">
-      <p><b>footer</b> (fixed height)</p>
-    </div> -->
   </div>
 </body>
 
