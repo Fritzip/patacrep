@@ -11,11 +11,14 @@
 </form>
 {% endblock navbar_extra %}
 
+{% block options %}
+{% endblock options %}
+
 {% block content %}
   {% for artist, chords in dartist.items %}
-      <span class="artist-header"><span id="{{ artist }}" class="font-weight-bold artist">{{ artist }}</span>
+      <span class="artist-header"><span class="font-weight-bold artist" id="{{ artist | slugify }}">{{ artist }}</span>
       {% for chord in chords %}
-        <span class="chord {% if forloop.last %}bottom-rounded{%endif%}" data-artist="{{artist}}"><a href="{% url 'patacrep:detail' chord.id %}">{{ chord.title }}</a>
+        <span class="chord {% if forloop.last %}bottom-rounded{%endif%}" data-artist="{{artist | slugify }}"><a href="{% url 'patacrep:detail' chord.id %}">{{ chord.title }}</a>
           {% if chord.removed_content_confirmation or chord.warning_lines %}
             <!-- <a href="{% url 'patacrep:confirm_remove' chord.id %}" class="badge badge-warning float-right mx-1">confirm</a> -->
           {% endif %}
@@ -38,37 +41,44 @@
     $("#searchbar").on('input', function() {
       var search = $(this).val();
       $( ".artist" ).each(function() {
-        var resartist = $(this).text().match(new RegExp(search, 'i'));
+        var $artist = $(this);
+        var resartist = $artist.text().match(new RegExp(search, 'i'));
         if(resartist == null) { // doesn't match the artist
           var at_least_one = false;
-          $( '.chord[data-artist="'+$(this).attr('id')+'"]').each(function() { // check for match in chords of the artist
-            var reschord = $(this).text().match(new RegExp(search, 'i'));
+          $( '.chord[data-artist="'+$artist.attr('id')+'"]').each(function() { // check for match in chords of the artist
+            var $chord = $(this);
+            var reschord = $chord.text().match(new RegExp(search, 'i'));
             if (reschord == null) { // chord doesn't match -> hide
-              $(this).hide();
+              $chord.hide();
             } else { // chord match -> show and do not hide artist
               at_least_one = true;
-              $(this).show();
+              $chord.show();
             }
           });
-          if (!at_least_one) {
-            $(this).hide();
+          if (at_least_one) {
+            $artist.show();
+          } else {
+            $artist.hide();
           }
         } else { // match the artist, show every chord
-          $(this).show();
-          $( '.chord[data-artist="'+$(this).attr('id')+'"]').each(function() {
+          $artist.show();
+          $( '.chord[data-artist="'+$artist.attr('id')+'"]').each(function() {
             $(this).show();
           });
         }
       });
     });
 
-    $(".artist-list").bind('click',function(event){
-        var artist = $(this).data("artist");
+
+    function anchor_highlight(artist) {
         var $artist = $('.artist[id="'+artist+'"]');
         var $chord = $( '.chord[data-artist="'+artist+'"]');
-
+        var scroll_amount = $artist.offset().left - 5;
+        if ($('.sidebar').is(":visible")) {
+          scroll_amount -= $('.sidebar').width();
+        }
         $('.content').stop().animate({
-            scrollLeft: '+='+($artist.offset().left - $('.sidebar').width() - 5)
+            scrollLeft: '+='+scroll_amount
         }, 600);
 
         $artist.addClass('anchor');
@@ -82,7 +92,17 @@
           });
           $artist.removeClass('anchor');
         }, 2000);
-        event.preventDefault();
+    }
+
+    var hash = window.location.hash.substr(1);
+    if (hash) {
+      anchor_highlight(hash);
+    }
+
+    $(".artist-list").bind('click',function(event){
+        var artist = $(this).data("artist");
+        anchor_highlight(artist);
+    //     event.preventDefault();
     });
   });
 </script>

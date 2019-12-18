@@ -2,7 +2,10 @@
 {% load static %}
 
 {% block pagetitle %}
-<span>{{ chord.title }}</span><small>{{ chord.artist }}</small>
+<span>{{ chord.title }}</span>
+<button type="button" class="btn btn-sm btn-outline-light shadow-none">
+  {{ chord.artist }}
+</button>
 {% endblock %}
 
 {% block buttons %}
@@ -14,49 +17,187 @@
 {% endblock %}
 
 {% block content %}
-<!-- {% autoescape off %} -->
-<!-- <span> -->
-  <div id="edit-chord-container" class="list-group">
+  <div id="edit-chord-container">
       {% for line in modified_lines %}
-        <button type="button" id="{{ line.0 }}" class="del_line list-group-item py-0 border-0 {% if line.2 %}list-group-item-danger{% elif line.3 %}list-group-item-warning{% endif %} text-left" style="font-family:Courier; font-size: 75%;white-space:pre; display: inline-block; outline: none !important; box-shadow: none;"> {{ line.1 }}</button>
+          <div class="input-group" id="{{ line.0 }}">
+            <div class="input-group-prepend">
+              <button class="undo-btn btn btn-outline-info" style="visibility: hidden;" type="button"><i class="fas fa-undo"></i></button>
+              <button class="warn-btn btn btn-outline-warning" style="visibility: hidden;" type="button"><i class="fas fa-exclamation-circle"></i></button>
+              <button class="del-btn btn btn-outline-secondary" type="button"><i class="fas fa-minus-circle"></i></button>
+            </div>
+            <input class="edit-chord-input list-group-item-action" id="{{ line.0 }}" type="text" value="{{line.1}}" style="border: none;">
+          </div>
       {% endfor %}
   </div>
-
-<!-- </span> -->
-<!-- {% endautoescape %} -->
-
 {% endblock %}
 
-
 {% block js %}
-  <!-- jQuery -->
-  <script src="{% static 'external/jquery-3.4.1.min.js' %}"></script>
-
+{{ block.super }}
   <script>
     $(document).ready(function() {
-      $('.del_line').click(function(e){
-        e.target.classList.toggle("list-group-item-danger");
+      jQuery.fn.isvisible = function() {
+        return this.css('visibility') == 'visible';
+      };
+
+      jQuery.fn.visible = function() {
+        return this.css('visibility', 'visible');
+      };
+
+      jQuery.fn.invisible = function() {
+        return this.css('visibility', 'hidden');
+      };
+
+      jQuery.fn.toggleVisibility = function() {
+        return this.css('visibility', function(i, visibility) {
+            return (visibility == 'visible') ? 'hidden' : 'visible';
+        });
+      };
+
+      // Rollback some global css to default for this page
+      $('.content').unbind('mousewheel');
+      $('.content').css('overflow-y', 'auto');
+
+      var lines = [
+            {% for item in modified_lines %}
+              {
+                content:'{{item.1|escapejs}}',
+                del:'{{ item.2 }}',
+                warn:'{{ item.3 }}',
+              },
+            {% endfor %}
+        ];
+
+      $('.edit-chord-input').blur(function() {
+        // console.log(JSON.stringify(lines[$(this).attr('id')]));
+        // console.log(JSON.stringify($(this).val()));
+        // console.log(lines[$(this).attr('id')].content === $(this).val());
+        if(lines[$(this).attr('id')].content != $(this).val()) {
+          $(this).prev().find('.undo-btn').visible();
+        }
       });
 
+      // Hitting return or arrow up/down to exit input
+      $('.edit-chord-input').keyup(function(e){
+        if(e.keyCode == 13 || e.keyCode == 40)
+        {
+          e.preventDefault();
+          $(this).blur();
+          $(this).closest('.input-group').next().find('.edit-chord-input').focus();  
+          //todo check if any changes, handle them, then, go to next
+        } else if (e.keyCode == 38) {
+          e.preventDefault();
+          $(this).blur();
+          $(this).closest('.input-group').prev().find('.edit-chord-input').focus();            
+        }
+      });
+
+      // Handeling del btn
+      $('.del-btn ').click(function(){
+          $(this).toggleClass("btn-outline-danger").toggleClass("btn-outline-secondary");
+          var $input = $(this).parent().next('.edit-chord-input')
+          $input.toggleClass('list-group-item-danger');
+          var $warnbtn = $(this).prev('.warn-btn');
+          var $undobtn = $(this).prev().prev('.undo-btn');
+          if ($warnbtn.isvisible()) {
+            $input.removeClass('list-group-item-warning');
+            $warnbtn.invisible();
+            $undobtn.visible();
+          }
+      });
+
+      // Handeling warn btn
+      $('.warn-btn').click(function(){
+          var $input = $(this).parent().next('.edit-chord-input');
+          if ($(this).isvisible()) {
+            $input.removeClass('list-group-item-warning');
+            $(this).invisible();
+            $(this).prev('.undo-btn').visible();
+          }
+      });
+
+      function reset_line(id) {
+        var $inputgrp = $("#"+id+".input-group");
+        var $input = $inputgrp.find('.edit-chord-input');
+        $input.val(lines[id].content); // reset line content
+
+        $delbtn = $inputgrp.find('.del-btn');
+        if (lines[id].del == "False") {
+          $delbtn.addClass('btn-outline-secondary').removeClass('btn-outline-danger');
+          $input.removeClass("list-group-item-danger");
+        } else {
+          $delbtn.addClass('btn-outline-danger').removeClass('btn-outline-secondary');
+          $input.addClass("list-group-item-danger");
+        }
+        
+        $warnbtn = $inputgrp.find('.warn-btn');
+        if (lines[id].warn == "False") {
+          $warnbtn.invisible();
+          $input.removeClass("list-group-item-warning");
+        } else {
+          $warnbtn.visible();
+          $input.addClass("list-group-item-warning");
+        }
+
+      }
+
+      $('.undo-btn').click(function(){
+        var id = $(this).closest('.input-group').attr('id');
+        reset_line(id);
+        $(this).invisible();
+      });
+
+      $('.undo-btn').each(function() {
+        $(this).click();
+      });
+
+      // Defines the width of the inputs for consistent scrollbar
+      function get_inputs_length() {
+        var input_width = 0;
+        $('.edit-chord-input').each(function() {
+          if($(this).val().length > input_width) {
+            input_width = $(this).val().length;
+          }
+        });  
+        return (input_width + 4)*7;
+      }
+
+      var input_width = get_inputs_length();
+
+      $('.edit-chord-input').each(function() {
+        $(this).css('min-width', (input_width + 4*7)+'px');
+      });
+
+      // Save the new content
       $('#save').click(function() {
-        console.log("save");
-        var rm_lines_id_array = []
-        $('.list-group-item-danger').each(function() {
+        var rm_lines_id_array = [];
+        var warn_lines_id_array = [];
+        var edited_lines_id_array = [];
+        var edited_lines_id_obj = {};
+        $('.edit-chord-input.list-group-item-danger').each(function() {
           rm_lines_id_array.push($(this).attr('id'));
+        });
+        $('.edit-chord-input.list-group-item-warning').each(function() {
+          warn_lines_id_array.push($(this).attr('id'));
+        });
+        $('.undo-btn').each(function() {
+          if($(this).isvisible()) {
+            // edited_lines_id_array.push(JSON.stringify({id:$(this).closest('.input-group').attr('id'),content:$(this).closest('.input-group').find('.edit-chord-input').val()}));
+            edited_lines_id_obj[$(this).closest('.input-group').attr('id')] = $(this).closest('.input-group').find('.edit-chord-input').val();
+          }
         });
         $.ajax({
           url: '{% url "patacrep:ajax_save_edit" %}',
           type: "POST",
           data: {
             'rm_lines': rm_lines_id_array,
+            'warn_lines': warn_lines_id_array,
+            'edited_lines': JSON.stringify(edited_lines_id_obj),
             'chord_pk': '{{ chord.pk }}',
             csrfmiddlewaretoken: '{{ csrf_token }}',
           },
           dataType: 'json',
           success: function (data) {
-            // console.log(data.pkid);
-            window.location.href = '{% url "patacrep:confirm_remove" 0 %}'.replace('0', data.pkid);
-            // location.href = "http://www.example.com/ThankYou.html"; 
+            // window.location.href = '{% url "patacrep:confirm_remove" 0 %}'.replace('0', data.pkid);
             // if (data.is_taken) {
             //   alert("Successfully modified : " + data.pkid);
             // }
@@ -69,7 +210,7 @@
     $("#save_and_next").click(function () {
       var chord_pk = $(this).attr("chord_pk");
       var modified_content = "" ;
-      $( ".del_line" ).each(function( index, e ) {
+      $( ".del-line" ).each(function( index, e ) {
         if (!$( e ).hasClass("list-group-item-danger") ) {
           modified_content = modified_content.concat($(e).text(), '\n');
         }
@@ -83,9 +224,7 @@
         },
         dataType: 'json',
         success: function (data) {
-          // console.log(data.pkid);
           window.location.href = '{% url "patacrep:confirm_remove" 0 %}'.replace('0', data.pkid);
-          // location.href = "http://www.example.com/ThankYou.html"; 
           // if (data.is_taken) {
           //   alert("Successfully modified : " + data.pkid);
           // }

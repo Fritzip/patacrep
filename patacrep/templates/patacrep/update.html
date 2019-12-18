@@ -1,0 +1,67 @@
+{% extends "patacrep/base_template.html" %}
+{% load static %}
+
+{% block pagetitle %}
+  Update
+{% endblock %}
+
+{% block navbar_extra %}
+{% endblock navbar_extra %}
+
+{% block options %}
+{% endblock options %}
+
+{% block content %}
+  <b>{{ nb_chords }} chords in the database.</b>
+  {% if output %}
+      {% if output.imports %}
+          <p><b>{{ output.imports|length }} new file(s) imported</b></p>
+      {% endif %}
+      {% if output.new_to_db %}
+          <p><b>{{ output.new_to_db|length }} new file(s) added to database.</b>
+          {% for name in output.new_to_db %}
+              <li>{{ name }}</li>
+          {% endfor %}</p>
+      {% endif %}
+      {% if output.updated_in_db %}
+          <p><b>{{ output.updated_in_db|length }} file(s) updated in database.</b>
+          {% for name in output.updated_in_db %}
+              <li>{{ name }}</li>
+          {% endfor %}</p>
+      {% endif %}
+      {% if output.already_in_db %}
+          <p><b>{{ output.already_in_db|length }} file(s) already in database.</b></p>
+      {% endif %}
+      {% if output.duplicates %}
+          <p><b>{{ output.duplicates|length }} duplicates.</b> <i>Choose the one you want from your bookmarks, remove the other, delete the tab from the database and re-update.</i>
+          {% for name, list_files in output.duplicates.items %}
+              <li>{{ name }}
+                <ul>
+                  {% for file in list_files %}
+                  <li>{{file}}</li>
+                  {% endfor %}
+                </ul>
+              </li>
+          {% endfor %}</p>
+      {% endif %}
+      {% if output.errors_imports %}
+          <p><b>{{ output.errors_imports|length }} error(s) while importing.</b>
+          {% for url in output.errors_imports %}
+              <li>{{ url }}</li>
+          {% endfor %}</p>
+      {% endif %}
+      {% if output.errors_add_to_db %}
+          <p><b>{{ output.errors_add_to_db|length }} error(s) while adding to database.</b>
+          {% for url in output.errors_add_to_db %}
+              <li>{{ url }}</li>
+          {% endfor %}</p>
+      {% endif %}
+  {% endif %}
+{% endblock %}
+
+
+{% block js %}
+{{block.super}}
+<script>
+</script>
+{% endblock %}
