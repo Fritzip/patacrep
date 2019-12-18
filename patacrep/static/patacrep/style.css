@@ -69,13 +69,74 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover {
   margin: 0px 5px;
 }
 
-.del-line {
+.input-group-prepend > .btn {
+  padding: 0px 2px;
+  border: none;
+  font-size: 12px;
+}
+
+.input-group {
+  line-height: 1;
+}
+
+.input-group:first-child {
+  border-radius: 10px;
+}
+
+.edit-chord-input {
   font-family:SourceCodePro;
   font-size: 75%;
+  /*display: inline-block;*/
   white-space:pre;
-  display: inline-block;
   outline: none !important;
   box-shadow: none;
+  padding: 0px 4px;
+}
+
+
+/* USELESS */
+.edit-chord-line > span:focus {
+    outline: 0px solid transparent;
+    background-color: rgb(215,215,215);
+}
+
+.edit-chord-line-text {
+  /*cursor: text;*/
+  display: inline-block;
+  width: 100%;
+  padding : 2px 4px;
+}
+
+.edit-chord-input-btn {
+  padding: 2px 4px;
+  line-height: 1;
+  box-shadow: none !important;
+  /*width: 1.5em;*/
+}
+
+.edit-chord-input-btn > 
+.edit-chord-input {
+  font-family:SourceCodePro;
+  font-size: 75%;
+  display: flex;
+  flex-grow: 1;
+  white-space:pre;
+  outline: none !important;
+  box-shadow: none;
+  padding: 0px;
+  /*width: 100%;*/
+  /*border:1px solid #ccc; */
+  /*background-color: blue;*/
+  border:0px solid transparent; 
+  /*-webkit-border-radius: 5px;*/
+  /*border-radius: 5px;*/
+}
+
+.no-copy {
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;          /* Likely future */     
 }
 
 .page-title > svg {
@@ -203,9 +264,6 @@ input[type=number] {
   -moz-appearance:textfield;
 }
 
-.content > #edit-chord-container {
-  overflow-y: auto;
-}
 
 .flex-col {
   display: flex;
@@ -231,4 +289,9 @@ input[type=number] {
 
 .alert:hover {
   opacity: 0.6;
+}
+
+.fa-stack {
+  padding: 0px;
+  display: block; 
 }

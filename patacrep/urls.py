@@ -16,6 +16,8 @@ urlpatterns = [
     path('<int:chord_id>/confirm_remove/', views.confirm_remove, name='confirm_remove'),
     path('ajax/save_edit/', views.save_edit, name='ajax_save_edit'),
 
+    path('update/', views.update, name='update'),
+
     path('<int:chord_id>/edit/', views.edit, name='edit'),
     path('save_and_next/', views.save_and_next, name='save_and_next'),
     path('ajax/next/', views.next, name='ajax_next'),

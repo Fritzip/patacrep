@@ -3,6 +3,7 @@ import os, re
 import json
 import unidecode, unicodedata
 from html.parser import HTMLParser
+import html
 
 patt_ug_url = re.compile("\"(https?:\/\/tabs\.ultimate-guitar\.com\/tab.*)\"\n")
 
@@ -17,6 +18,7 @@ patt_chord_lost = re.compile("\s"+chord+"\s")
 patt_chord = re.compile("\[ch\](.+?)\[\/ch\]")
 patt_sharp_in_non_chord = re.compile("#(?![^\[ch\]]*\[\/ch\])")
 patt_json_extract = re.compile("<script>\s*window.UGAPP.store.page\s=\s(.*);")
+patt_json_extract_new = re.compile("<div\sclass=\"js-store\"\sdata-content=\"(.*)\"></div>")
 
 patt_html_code = re.compile("(?:[^a-zA-Z0-9\s]#|&[^a-zA-Z0-9\s])(\d{1,4};)")
 
@@ -82,60 +84,98 @@ def import_from_ug():
                     errors_imports.append(url)
                     continue
                 else : 
-                    imports.append(url)
+                    imports.append(os.path.basename(url))
 
     return imports, errors_imports
 
 
-def add_to_db(): #add to db
+def ug_old_import(j):
+    artist = j["data"]["tab"]["artist_name"].replace("&","and")
+    title = j["data"]["tab"]["song_name"].replace("&","and")
+    try: capo = j["data"]["tab_view"]["meta"]["capo"]
+    except: capo = -1
+    content = j["data"]["tab_view"]["wiki_tab"]["content"],
+    chords = ", ".join(list(j["data"]["tab_view"]["applicature"].keys()))
+
+    return artist, title, capo, content, chords
+
+def ug_new_import(j):
+    artist = j["store"]["page"]["data"]["tab"]["artist_name"]
+    title = j["store"]["page"]["data"]["tab"]["song_name"]
+    try: capo = j["store"]["page"]["data"]["tab_view"]["meta"]["capo"]
+    except: capo = -1
+    content = j["store"]["page"]["data"]["tab_view"]["wiki_tab"]["content"].replace("[tab]", "").replace("[/tab]", "")
+    chords = ", ".join(list(j["store"]["page"]["data"]["tab_view"]["applicature"].keys()))
+
+    return artist, title, capo, content, chords
+
+
+def add_to_db(imports=[]):
     new_to_db = []
+    updated_in_db = []
     already_in_db = []
     duplicates = []
     errors = []
-
     for filename in os.listdir(TODODIR):
-        # base = os.path.splitext(os.path.basename(filename))[0]
-        # basepath = os.path.join(TODODIR, base)
-        # print(base)
-
         fr = open(os.path.join(TODODIR, filename),"r")
         html2txt = "\n".join(fr.readlines())
         txt2json = re.findall(patt_json_extract, html2txt)
 
-        if len(txt2json) != 1:
-            errors.append(filename)
-            continue
-            # print(color.RED,"Error : cannot extract from this file : ", color.END, base, end = "")
-            # print("... ignoring")
-            # jsonlog["failure"][base] = 0
+        ug_new_imported_tab = False
+
+        if len(txt2json) == 1: # ug old format
+            get_metadata = ug_old_import
+        else :
+            txt2json = re.findall(patt_json_extract_new, html2txt)
+            if len(txt2json) != 1:
+                errors.append(filename)
+                continue
+            # ug new format
+            txt2json[0] = html.unescape(txt2json[0])
+            get_metadata = ug_new_import
+            ug_new_imported_tab = True
 
         j = json.loads(txt2json[0])
         fr.close()
 
-        artist = j["data"]["tab"]["artist_name"].replace("&","and")
-        title = j["data"]["tab"]["song_name"].replace("&","and")
-        try: capo = j["data"]["tab_view"]["meta"]["capo"]
-        except: capo = -1
+        artist, title, capo, content, chords = get_metadata(j)
 
         try:
             chord = Chord.objects.get(artist=artist, title=title)
-            if ( chord.pk in already_in_db or chord.pk in new_to_db ) and chord.pk not in duplicates:
-                duplicates.append(chord.pk)
-                # already_in_db.remove(chord.pk)
-            already_in_db.append(chord.pk)
+            if filename in imports: # if the html file has just been imported but the chord already exist (reimport), update the existing 
+                if os.path.basename(chord.file.name) != filename:
+                    duplicates.append( (chord.pk, os.path.basename(chord.file.name)) )                
+                chord.artist=artist
+                chord.title=title
+                chord.capo=capo
+                chord.edited=False
+                chord.chords=chords
+                chord.content=content
+                chord.file=os.path.join(TODODIR, filename)
+                chord.save()
+                updated_in_db.append(chord.pk)
+            else:    
+                if os.path.basename(chord.file.name) != filename:
+                    duplicates.append( (chord.pk, filename) )
+                else:
+                    already_in_db.append(chord.pk)
+                # if ( chord.pk in already_in_db or chord.pk in new_to_db ) and chord.pk not in duplicates:
+                    # print("chordfile = ", chord.file)
+                    # print("filename = ", filename)
+                    # duplicates.append(chord.pk)
         except Chord.DoesNotExist:
             chord = Chord( artist=artist,
                            title=title,
                            capo=capo,
                            nbcol=1,
                            edited=False,
-                           chords= ", ".join(list(j["data"]["tab_view"]["applicature"].keys())),
-                           content=j["data"]["tab_view"]["wiki_tab"]["content"],
+                           chords=chords,
+                           content=content,
                            file=os.path.join(TODODIR, filename))
             chord.save()
             new_to_db.append(chord.pk)
 
-    return new_to_db, list(set(already_in_db)), duplicates, errors
+    return new_to_db, updated_in_db, list(set(already_in_db)), duplicates, errors
 
     # jout["lowtitle"] = unidecode.unidecode(jout["title"].lower().replace(" ","_"))
     # jout["lowartist"] = unidecode.unidecode(jout["artist"].lower().replace(" ","_"))
@@ -327,7 +367,7 @@ def clean_chord(chord_id):
 def update_all(): # import html files from UG chromium bookmarks
     imports, errors_imports = import_from_ug()
 
-    new_to_db, already_in_db, duplicates, errors_add_to_db = add_to_db()
+    new_to_db, updated_in_db, already_in_db, duplicates, errors_add_to_db = add_to_db(imports)
 
     for chord in Chord.objects.all():
         clean_chord(chord.pk)
@@ -347,6 +387,7 @@ def update_all(): # import html files from UG chromium bookmarks
     #         #     errors_added2db.append(url)
 
     return {"new_to_db" : new_to_db,
+            "updated_in_db" : updated_in_db,
             "already_in_db" : already_in_db,
             "duplicates" : duplicates,
             "errors_add_to_db" : errors_add_to_db,

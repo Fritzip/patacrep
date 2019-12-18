@@ -11,6 +11,9 @@
 </form>
 {% endblock navbar_extra %}
 
+{% block options %}
+{% endblock options %}
+
 {% block content %}
   {% for artist, chords in dartist.items %}
       <span class="artist-header"><span class="font-weight-bold artist" id="{{ artist | slugify }}">{{ artist }}</span>

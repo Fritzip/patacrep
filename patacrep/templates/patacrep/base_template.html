@@ -46,6 +46,7 @@
               {% endblock options %}
               {% if user.is_superuser %}
                 <a class="dropdown-item option-dropdown" id="admin-chord" href="{% url 'admin:patacrep_chord_changelist' %}"><i class="fas fa-database"></i> Chord List</a>
+                <a class="dropdown-item option-dropdown" id="update" href="{% url 'patacrep:update' %}"><i class="fas fa-sync-alt"></i> Update</a>
               {% endif %}
             </div>
           </div>

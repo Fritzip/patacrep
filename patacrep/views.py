@@ -1,3 +1,5 @@
+import os,random, json
+
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -8,13 +10,12 @@ from django.views.generic import DetailView
 from .models import Chord, ChordForm
 from .scripts import update_all, clean_chord, format_content
 
-import random
 
 def get_chord_name_from_id(pkid):
     return str(Chord.objects.get(pk=pkid))
 
 def index(request):
-    chords_list = Chord.objects.order_by('artist')#[:5]
+    chords_list = Chord.objects.order_by('artist')
     dartist = {}
     for chord in chords_list:
         try:
@@ -24,14 +25,34 @@ def index(request):
 
     context = {'dartist': dartist, 'nb_chords':Chord.objects.count()}
 
-    if request.method == 'POST' and 'update' in request.POST and request.user.is_superuser:
+    return render(request, 'patacrep/index.html', context)
+
+def update(request):
+    context = {'nb_chords':Chord.objects.count()}
+
+    if request.user.is_superuser:
             output = update_all() 
             output['new_to_db'] = [get_chord_name_from_id(pkid) for pkid in output['new_to_db']]
+            output['updated_in_db'] = [get_chord_name_from_id(pkid) for pkid in output['updated_in_db']]
             output['already_in_db'] = [get_chord_name_from_id(pkid) for pkid in output['already_in_db']]
-            output['duplicates'] = [get_chord_name_from_id(pkid) for pkid in output['duplicates']]
+            # output['duplicates'] = [get_chord_name_from_id(pkid) for pkid in output['duplicates']]
+            d = {}
+            for pkid, filename in output['duplicates']:
+                if pkid in d:
+                    d[pkid].append(filename)
+                else:
+                    d[pkid] = [filename]
+
+            pkids = list(d.keys())
+            for pkid in pkids:
+                print(pkid)
+                d[pkid].append(os.path.basename(Chord.objects.only('file').get(pk=pkid).file.name))
+                d[get_chord_name_from_id(pkid)] = d.pop(pkid)
+
+            output['duplicates'] = d
             context['output'] = output
 
-    return render(request, 'patacrep/index.html', context)
+    return render(request, 'patacrep/update.html', context)
 
 class ChordDetail(DetailView):
     model = Chord
@@ -140,9 +161,32 @@ def clean(request):
 @login_required
 def save_edit(request):
     rm_lines = request.POST.getlist('rm_lines[]')
+    warn_lines = request.POST.getlist('warn_lines[]')
+    edited_lines = request.POST['edited_lines']
+    edited_lines = json.loads(edited_lines)
+
+    print(edited_lines)
     chord_pk = request.POST['chord_pk']
 
-    Chord.objects.filter(pk=chord_pk).update(removed_content_confirmation=", ".join(rm_lines))
+    Chord.objects.filter(pk=chord_pk).update(removed_content_confirmation=", ".join(rm_lines), warning_lines=", ".join(warn_lines))
+
+    if edited_lines:
+        modlines = list(map(int, edited_lines.keys()))
+
+        chord = get_object_or_404(Chord, pk=chord_pk)
+        content = getattr(chord, 'content')
+
+        new_content = []
+        for i, line in enumerate(content.split('\n')):
+            if i in modlines:
+                new_content.append(edited_lines[str(i)])
+            else:
+                new_content.append(line)
+
+        chord.content = '\n'.join(new_content)
+        chord.edited = True
+        chord.save()
+
     data = {
         'pkid': chord_pk
     }
@@ -157,6 +201,7 @@ def confirm_remove(request, chord_id):
 
     modified_lines = []
     for i, line in enumerate(chord.content.split('\n')):
+        line = line.replace('\r', '')
         if str(i) in rcc:
             modified_lines.append((i, line, True, False))
         elif str(i) in wl:
