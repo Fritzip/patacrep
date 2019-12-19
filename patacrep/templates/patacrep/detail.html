@@ -129,6 +129,7 @@
                 $(star).attr('data-prefix', 'far');
                 $(star).css('color', 'unset');
               }
+              $(star).toggleClass('fas').toggleClass('far');
             }
             var notiftype = data['success'] ? 'success' : 'warning';
             var notif = $.notify({

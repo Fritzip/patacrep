@@ -69,6 +69,12 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover {
   margin: 0px 5px;
 }
 
+
+.page-title > svg, .page-title > i {
+  font-size: 14px;
+  margin-right: 0px;
+}
+
 .input-group-prepend > .btn {
   padding: 0px 2px;
   border: none;
@@ -137,11 +143,6 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover {
   -moz-user-select: none;     /* Firefox all */
   -ms-user-select: none;      /* IE 10+ */
   user-select: none;          /* Likely future */     
-}
-
-.page-title > svg {
-  font-size: 14px;
-  margin-right: 0px;
 }
 
 .page-buttons {
@@ -289,9 +290,4 @@ input[type=number] {
 
 .alert:hover {
   opacity: 0.6;
-}
-
-.fa-stack {
-  padding: 0px;
-  display: block; 
 }
