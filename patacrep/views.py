@@ -15,13 +15,13 @@ def get_chord_name_from_id(pkid):
     return str(Chord.objects.get(pk=pkid))
 
 def index(request):
-    chords_list = Chord.objects.order_by('artist')
+    chords_list = Chord.objects.values('id','artist','title','favorite').order_by('artist')
     dartist = {}
     for chord in chords_list:
         try:
-            dartist[chord.artist].append(chord)
+            dartist[chord['artist']].append(chord)
         except :
-            dartist[chord.artist] = [chord]
+            dartist[chord['artist']] = [chord]
 
     context = {'dartist': dartist, 'nb_chords':Chord.objects.count()}
 
