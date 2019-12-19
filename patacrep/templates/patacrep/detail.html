@@ -71,11 +71,13 @@
 
 
 {% block content %}
-{% autoescape on %}
-<div id="chordcontent">
-{{ chord.content }}
+<div class="content">
+  {% autoescape on %}
+  <div id="chordcontent">
+  {{ chord.content }}
+  </div>
+  {% endautoescape %}
 </div>
-{% endautoescape %}
 {% endblock %}
 
 {% block js %}

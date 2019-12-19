@@ -17,6 +17,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="content">
   <div id="edit-chord-container">
       {% for line in modified_lines %}
           <div class="input-group" id="{{ line.0 }}">
@@ -29,6 +30,7 @@
           </div>
       {% endfor %}
   </div>
+</div>
 {% endblock %}
 
 {% block js %}

@@ -12,6 +12,7 @@
 {% endblock options %}
 
 {% block content %}
+<div class="content">
   <b>{{ nb_chords }} chords in the database.</b>
   {% if output %}
       {% if output.imports %}
@@ -57,6 +58,7 @@
           {% endfor %}</p>
       {% endif %}
   {% endif %}
+</div>
 {% endblock %}
 
 

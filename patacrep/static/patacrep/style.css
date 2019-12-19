@@ -162,6 +162,7 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover {
 .content-wrapper {
   display: flex;
   flex-flow: row;
+  flex: 1 1 auto;
   overflow-y: hidden;
 }
 
