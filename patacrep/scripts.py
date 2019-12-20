@@ -169,7 +169,6 @@ def add_to_db(imports=[]):
             chord = Chord( artist=artist,
                            title=title,
                            capo=capo,
-                           nbcol=1,
                            edited=False,
                            chords=chords,
                            content=content,
