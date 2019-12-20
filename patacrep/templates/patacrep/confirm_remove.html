@@ -75,6 +75,7 @@
         // console.log(lines[$(this).attr('id')].content === $(this).val());
         if(lines[$(this).attr('id')].content != $(this).val()) {
           $(this).prev().find('.undo-btn').visible();
+          $(this).addClass("edited");
         }
       });
 
@@ -121,6 +122,7 @@
         var $inputgrp = $("#"+id+".input-group");
         var $input = $inputgrp.find('.edit-chord-input');
         $input.val(lines[id].content); // reset line content
+        $input.removeClass("edited");
 
         $delbtn = $inputgrp.find('.del-btn');
         if (lines[id].del == "False") {
@@ -181,11 +183,14 @@
         $('.edit-chord-input.list-group-item-warning').each(function() {
           warn_lines_id_array.push($(this).attr('id'));
         });
-        $('.undo-btn').each(function() {
-          if($(this).isvisible()) {
-            // edited_lines_id_array.push(JSON.stringify({id:$(this).closest('.input-group').attr('id'),content:$(this).closest('.input-group').find('.edit-chord-input').val()}));
-            edited_lines_id_obj[$(this).closest('.input-group').attr('id')] = $(this).closest('.input-group').find('.edit-chord-input').val();
-          }
+        // $('.undo-btn').each(function() {
+        //   if($(this).isvisible()) {
+        //     // edited_lines_id_array.push(JSON.stringify({id:$(this).closest('.input-group').attr('id'),content:$(this).closest('.input-group').find('.edit-chord-input').val()}));
+        //     edited_lines_id_obj[$(this).closest('.input-group').attr('id')] = $(this).closest('.input-group').find('.edit-chord-input').val();
+        //   }
+        // });
+        $('.edit-chord-input.edited').each(function() {
+          edited_lines_id_obj[$(this).attr('id')] = $(this).val();
         });
         $.ajax({
           url: '{% url "patacrep:ajax_save_edit" %}',

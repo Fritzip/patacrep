@@ -69,7 +69,7 @@ class ChordDetail(DetailView):
                 new_content.append(line)
 
         self.object.content = '\n'.join(new_content)
-
+        
         # Call the base implementation first to get a context
         context = super(ChordDetail, self).get_context_data(**kwargs)
         context['form'] = ChordForm
@@ -164,8 +164,8 @@ def save_edit(request):
     warn_lines = request.POST.getlist('warn_lines[]')
     edited_lines = request.POST['edited_lines']
     edited_lines = json.loads(edited_lines)
-
     print(edited_lines)
+
     chord_pk = request.POST['chord_pk']
 
     Chord.objects.filter(pk=chord_pk).update(removed_content_confirmation=", ".join(rm_lines), warning_lines=", ".join(warn_lines))
