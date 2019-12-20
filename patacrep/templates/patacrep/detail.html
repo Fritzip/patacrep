@@ -21,7 +21,10 @@
 {% endblock %}
 
 {% block buttons %}
-  
+  {% if user.is_superuser %}
+  <a role="button" class="btn btn-danger" id="edit_state"><i class="fas {% if chord.edited %}fa-lock{% else %}fa-unlock-alt{% endif %}"></i></a>
+  <a role="button" class="btn btn-danger" id="clean"><i class="fas fa-broom"></i></a>
+  {% endif %}
   {% if chord.warning_lines and user.is_superuser %}
   <a role="button" class="btn btn-warning" href="{% url 'patacrep:confirm_remove' chord.id %}"><i class="fas fa-exclamation-triangle"></i></a>
   {% elif user.is_superuser %}
@@ -43,7 +46,7 @@
 {% block options %}
   {% if user.is_superuser %}
     <!-- <a class="dropdown-item option-dropdown" id="edit" href="{% url 'patacrep:confirm_remove' chord.id %}"><i class="fas fa-edit"></i> Edit</a> -->
-    <a class="dropdown-item option-dropdown" id="clean"><i class="fas fa-broom"></i> Clean</a>
+    <!-- <a class="dropdown-item option-dropdown" id="clean"><i class="fas fa-broom"></i> Clean</a> -->
     <a class="dropdown-item option-dropdown" id="admin-chord" href="{% url 'admin:patacrep_chord_change' chord.id %}"><i class="fas fa-database"></i> Chord</a>
   {% endif %}
 {% endblock options %}
@@ -166,6 +169,32 @@
           }
         });
       });
+
+      $(document).on('click', '#edit_state', function(){
+        var $btn = $(this);
+        $.ajax({
+          url: '{% url "patacrep:ajax_toggle_edited" %}',
+          type: "POST",
+          data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              'chord_pk': '{{chord.pk}}',
+          },
+          dataType: 'json',
+          success: function (data) {
+            if(data['success']) {
+              $btn.children(":first").toggleClass('fa-unlock-alt').toggleClass('fa-lock');
+            }
+            var notiftype = data['success'] ? 'success' : 'warning';
+            var notif = $.notify({
+              message: data['message'],
+            }, $.extend(settings,{type:notiftype}));
+            notif.$ele.on('click', function() {
+              notif.close();
+            });
+          }
+        });
+      });
+
 
       $(document).on('click', '#clean', function(){
         $.ajax({

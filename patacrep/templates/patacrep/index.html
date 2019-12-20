@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block pagetitle %}
-  Index
+  Index {% if user.is_superuser %}<span>{{ nb_chords }} chords</span><span>{{ nb_warn }} warnings</span>{% endif %}
 {% endblock %}
 
 {% block navbar_extra %}

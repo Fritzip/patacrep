@@ -14,7 +14,7 @@ def get_chord_name_from_id(pkid):
     return str(Chord.objects.get(pk=pkid))
 
 def index(request):
-    chords_list = Chord.objects.values('id','artist','title','favorite', 'warning_lines').order_by('artist')
+    chords_list = Chord.objects.values('id','artist','title','favorite','edited','warning_lines').order_by('artist')
     dartist = {}
     for chord in chords_list:
         try:
@@ -22,7 +22,7 @@ def index(request):
         except :
             dartist[chord['artist']] = [chord]
 
-    context = {'dartist': dartist, 'nb_chords':Chord.objects.count()}
+    context = {'dartist': dartist, 'nb_chords':Chord.objects.count(), 'nb_warn': Chord.objects.filter(~Q(warning_lines__exact='')).count()}
 
     return render(request, 'patacrep/index.html', context)
 
@@ -116,6 +116,31 @@ def toggle_favorite(request):
             message = "Successfully added to favorite"
         else:
             message = "Successfully removed from favorite"
+    else:
+        message = "You need admin privilege for that"
+
+    data = {
+        'added' : added,
+        'success' : success,
+        'message': message
+    }
+    return JsonResponse(data)
+
+def toggle_edited(request):
+    success = False
+    added = False
+    message = ""
+    if request.user.is_superuser:
+        chord_pk = request.POST['chord_pk']
+        chord = get_object_or_404(Chord, pk=chord_pk)
+        chord.edited = not chord.edited
+        added = chord.edited
+        chord.save()
+        success = True
+        if chord.edited:
+            message = "Chord is now edited"
+        else:
+            message = "Chord is now unedited"
     else:
         message = "You need admin privilege for that"
 
