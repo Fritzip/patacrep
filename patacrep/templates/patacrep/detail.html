@@ -73,9 +73,7 @@
 {% block content %}
 <div class="content">
   {% autoescape on %}
-  <div id="chordcontent">
-  {{ chord.content }}
-  </div>
+  <div id="chordcontent">{{ chord.content }}</div>
   {% endautoescape %}
 </div>
 {% endblock %}
@@ -86,8 +84,8 @@
   <script>
     $(document).ready(function(){
       var lines = $('#chordcontent').text().split('\n');
-      for(var i = 0;i < lines.length;i++){
-        lines[i] = "<div class=\"chordline\">" + lines[i] + "</div>";
+      for(var i = 0; i < lines.length; i++){
+        lines[i] = '<div class="chordline">' + lines[i] + '</div>';
       }
       $("#chordcontent").replaceWith(lines.join("\n"));
     });

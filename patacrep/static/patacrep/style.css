@@ -222,6 +222,10 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover {
   border-right: 1px dashed #333;
 }
 
+.chordline:empty:before {
+  content: "\200b";
+}
+
 .infotab {
   display: flex;
   flex-direction: column;
