@@ -8,14 +8,13 @@ from django.db.models import Q
 from django.views.generic import DetailView
 
 from .models import Chord, ChordForm
-from .scripts import update_all, clean_chord, format_content
-
+from .scripts import update_all, clean_chord, format_content, comma_sep_int_string_to_list, int_list_to_comma_sep_string
 
 def get_chord_name_from_id(pkid):
     return str(Chord.objects.get(pk=pkid))
 
 def index(request):
-    chords_list = Chord.objects.values('id','artist','title','favorite').order_by('artist')
+    chords_list = Chord.objects.values('id','artist','title','favorite', 'warning_lines').order_by('artist')
     dartist = {}
     for chord in chords_list:
         try:
@@ -45,7 +44,6 @@ def update(request):
 
             pkids = list(d.keys())
             for pkid in pkids:
-                print(pkid)
                 d[pkid].append(os.path.basename(Chord.objects.only('file').get(pk=pkid).file.name))
                 d[get_chord_name_from_id(pkid)] = d.pop(pkid)
 
@@ -61,15 +59,14 @@ class ChordDetail(DetailView):
     def get_context_data(self, **kwargs):
         self.object.content = format_content(self.object.content)
         
-        rcc = self.object.removed_content_confirmation.split(', ')
-
+        deleted_lines = comma_sep_int_string_to_list(self.object.deleted_lines)
         new_content = []
         for i, line in enumerate(self.object.content.split('\n')):
-            if str(i) not in rcc:
+            if i not in deleted_lines:
                 new_content.append(line)
 
         self.object.content = '\n'.join(new_content)
-        
+
         # Call the base implementation first to get a context
         context = super(ChordDetail, self).get_context_data(**kwargs)
         context['form'] = ChordForm
@@ -134,7 +131,6 @@ def change_start_note(request):
     message = ""
     if request.user.is_superuser:
         chord_pk = request.POST['chord_pk']
-        print(chord_pk)
         chord = get_object_or_404(Chord, pk=chord_pk)
         chord.start_note = request.POST['new_start_note']
         chord.save()
@@ -160,32 +156,47 @@ def clean(request):
 
 @login_required
 def save_edit(request):
-    rm_lines = request.POST.getlist('rm_lines[]')
-    warn_lines = request.POST.getlist('warn_lines[]')
+    rm_lines = list(map(int, request.POST.getlist('rm_lines[]')))
+    warn_lines = list(map(int, request.POST.getlist('warn_lines[]')))
     edited_lines = request.POST['edited_lines']
     edited_lines = json.loads(edited_lines)
-    print(edited_lines)
 
     chord_pk = request.POST['chord_pk']
+    chord = get_object_or_404(Chord, pk=chord_pk)
 
-    Chord.objects.filter(pk=chord_pk).update(removed_content_confirmation=", ".join(rm_lines), warning_lines=", ".join(warn_lines))
+    handled_lines = comma_sep_int_string_to_list(chord.handled_lines)
+    old_warn_lines = comma_sep_int_string_to_list(chord.warning_lines)
+    old_deleted_lines = comma_sep_int_string_to_list(chord.deleted_lines)
+
+    for old_warn_line in old_warn_lines:
+        if old_warn_line not in warn_lines:
+            handled_lines.append(old_warn_line)
+
+    for old_auto_deleted_line in old_deleted_lines:
+        if old_auto_deleted_line not in rm_lines:
+            handled_lines.append(old_auto_deleted_line)
 
     if edited_lines:
         modlines = list(map(int, edited_lines.keys()))
 
-        chord = get_object_or_404(Chord, pk=chord_pk)
         content = getattr(chord, 'content')
 
         new_content = []
         for i, line in enumerate(content.split('\n')):
             if i in modlines:
                 new_content.append(edited_lines[str(i)])
+                handled_lines.append(i)
             else:
                 new_content.append(line)
 
         chord.content = '\n'.join(new_content)
         chord.edited = True
-        chord.save()
+    
+    chord.deleted_lines=int_list_to_comma_sep_string(rm_lines)
+    chord.warning_lines=int_list_to_comma_sep_string(warn_lines)
+    chord.handled_lines=int_list_to_comma_sep_string(handled_lines)
+
+    chord.save()
 
     data = {
         'pkid': chord_pk
@@ -196,15 +207,15 @@ def save_edit(request):
 def confirm_remove(request, chord_id):
     chord = get_object_or_404(Chord, pk=chord_id)
 
-    rcc = chord.removed_content_confirmation.split(', ')
-    wl = chord.warning_lines.split(', ')
+    deleted_lines = comma_sep_int_string_to_list(chord.deleted_lines)
+    warning_lines = comma_sep_int_string_to_list(chord.warning_lines)
 
     modified_lines = []
     for i, line in enumerate(chord.content.split('\n')):
         line = line.replace('\r', '')
-        if str(i) in rcc:
+        if i in deleted_lines:
             modified_lines.append((i, line, True, False))
-        elif str(i) in wl:
+        elif i in warning_lines:
             modified_lines.append((i, line, False, True))
         else:
             modified_lines.append((i, line, False, False))
@@ -246,7 +257,7 @@ def save_and_next(request):
 
     # get next
     chord = Chord.objects.get(pk=chord_pk)
-    chords = Chord.objects.order_by('artist').filter(~Q(removed_content_confirmation = "")|~Q(warning_lines = ""))
+    chords = Chord.objects.order_by('artist').filter(~Q(deleted_lines = "")|~Q(warning_lines = ""))
     save_next = False
     for c in chords:
         print(c)

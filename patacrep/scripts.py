@@ -41,6 +41,12 @@ if not os.path.exists(DONEDIR):
 
 h = HTMLParser()
 
+def comma_sep_int_string_to_list(s):
+    return list(map(int, s.split(', '))) if s != "" else []
+
+def int_list_to_comma_sep_string(l):
+    return ', '.join(list(map(str, sorted(list(set(l))))))
+
 def is_empty(line):
     return line.strip() == ""
 
@@ -56,7 +62,6 @@ def is_song_part_header(line):
 
 def is_tab_line(line):
     return re.search(patt_tab,line) != None
-
 
 def import_from_ug():
     # print_box("Importing bookmarks")
@@ -93,8 +98,8 @@ def ug_old_import(j):
     artist = j["data"]["tab"]["artist_name"].replace("&","and")
     title = j["data"]["tab"]["song_name"].replace("&","and")
     try: capo = j["data"]["tab_view"]["meta"]["capo"]
-    except: capo = -1
-    content = j["data"]["tab_view"]["wiki_tab"]["content"],
+    except: capo = 0
+    content = j["data"]["tab_view"]["wiki_tab"]["content"].strip(),
     chords = ", ".join(list(j["data"]["tab_view"]["applicature"].keys()))
 
     return artist, title, capo, content, chords
@@ -103,8 +108,8 @@ def ug_new_import(j):
     artist = j["store"]["page"]["data"]["tab"]["artist_name"]
     title = j["store"]["page"]["data"]["tab"]["song_name"]
     try: capo = j["store"]["page"]["data"]["tab_view"]["meta"]["capo"]
-    except: capo = -1
-    content = j["store"]["page"]["data"]["tab_view"]["wiki_tab"]["content"].replace("[tab]", "").replace("[/tab]", "")
+    except: capo = 0
+    content = j["store"]["page"]["data"]["tab_view"]["wiki_tab"]["content"].replace("[tab]", "").replace("[/tab]", "").strip()
     chords = ", ".join(list(j["store"]["page"]["data"]["tab_view"]["applicature"].keys()))
 
     return artist, title, capo, content, chords
@@ -159,10 +164,7 @@ def add_to_db(imports=[]):
                     duplicates.append( (chord.pk, filename) )
                 else:
                     already_in_db.append(chord.pk)
-                # if ( chord.pk in already_in_db or chord.pk in new_to_db ) and chord.pk not in duplicates:
-                    # print("chordfile = ", chord.file)
-                    # print("filename = ", filename)
-                    # duplicates.append(chord.pk)
+
         except Chord.DoesNotExist:
             chord = Chord( artist=artist,
                            title=title,
@@ -210,7 +212,7 @@ def add_to_db(imports=[]):
     #     fw.write("[ENDMETADATA]\n")
 
 def clean_odd_or_even_line_breaks(chord):
-    lcontent = chord.content.rstrip().split('\n')
+    lcontent = chord.content.split('\n')
 
     DEL_ODD = True
     DEL_EVEN = True
@@ -242,7 +244,7 @@ def clean_odd_or_even_line_breaks(chord):
 
 def clean_multiple_line_breaks(chord):
     # Remove multiple line break
-    lcontent = chord.content.rstrip().split('\n')
+    lcontent = chord.content.split('\n')
 
     i = 0
     lcontent_new = []
@@ -273,14 +275,22 @@ def clean_empty_lines_at_begin_and_end(chord):
 
 def clean_chord(chord_id):
     chord = Chord.objects.get(pk=chord_id)
-    clean_odd_or_even_line_breaks(chord)
-    clean_multiple_line_breaks(chord)
-    clean_empty_lines_at_begin_and_end(chord)
+
+    if chord.edited:
+        return
 
     warning_lines = []
-    removed_content_confirmation = []
+    deleted_lines = []
 
-    lcontent = chord.content.rstrip().split('\n')
+
+    # /!\ hard operations that breaks line indexing
+    if chord.deleted_lines == "" and chord.warning_lines == "" and chord.handled_lines == "":
+        clean_odd_or_even_line_breaks(chord)
+        clean_multiple_line_breaks(chord)
+        clean_empty_lines_at_begin_and_end(chord)
+
+
+    lcontent = chord.content.split('\n')
 
     # Find begining and trash everything before
     i=0
@@ -290,7 +300,7 @@ def clean_chord(chord_id):
         i += 1
 
     if i < len(lcontent) and i >= 1 and not is_empty(lcontent[i].strip()):
-        removed_content_confirmation.extend(list(range(i)))
+        deleted_lines.extend(list(range(i)))
 
     while i < len(lcontent):            
         # Fix encoding - Bad character
@@ -345,24 +355,31 @@ def clean_chord(chord_id):
                 # print(color.YELLOW, "Lost chords : ", relicate.strip(), color.END)
                 # jsonlog["optional"][filename][i+line_nb][len(jsonlog["optional"][filename][i+line_nb].keys())] = {"content":lcontent[i],"reason":"lost-chord"}
             # else:
-            #     removed_content_confirmation.append(i)
+            #     deleted_lines.append(i)
             #     i += 1
             #     continue
             #     # Most likely junk
             #     print("Delete line : ", lcontent[i].strip())
             #     jsonlog["optional"][filename][i+line_nb][len(jsonlog["optional"][filename][i+line_nb].keys())] = {"content":lcontent[i],"reason":"junk"}
         i += 1
-        # fw.write(lcontent[i])
-        # fw.write('\n')
 
 
-    # if removed_content_confirmation != "":
-    chord.removed_content_confirmation = ", ".join(map(str, removed_content_confirmation))
-    # if warning_lines:
-    chord.warning_lines = ", ".join(map(str, warning_lines))
+    handled_lines = comma_sep_int_string_to_list(chord.handled_lines)
+
+    new_warning_lines = comma_sep_int_string_to_list(chord.warning_lines)
+    for warning_line in warning_lines:
+        if warning_line not in handled_lines:
+            new_warning_lines.append(warning_line)
+
+    new_deleted_lines = comma_sep_int_string_to_list(chord.deleted_lines)
+    for deleted_line in deleted_lines:
+        if deleted_line not in handled_lines:
+            new_deleted_lines.append(deleted_line)
+
+    chord.deleted_lines = int_list_to_comma_sep_string(new_deleted_lines)
+    chord.warning_lines = int_list_to_comma_sep_string(new_warning_lines)
     chord.content = '\n'.join(lcontent)
     chord.save()
-    # fw.close()
 
 def update_all(): # import html files from UG chromium bookmarks
     imports, errors_imports = import_from_ug()
@@ -371,20 +388,6 @@ def update_all(): # import html files from UG chromium bookmarks
 
     for chord in Chord.objects.all():
         clean_chord(chord.pk)
-    # for url in urls:
-    #     if url in errors_imports :
-    #         continue
-    #     pkid, new2db = add_to_db(os.path.basename(url))
-    #     if url in imports:
-    #         if new2db:
-    #             new_import2db.append(pkid)
-    #         else:
-    #             import_but_already_in_db.append(pkid)
-    #     else:
-    #         if new2db:
-    #             new2db_but_already_imported.append(pkid)
-    #         # else:
-    #         #     errors_added2db.append(url)
 
     return {"new_to_db" : new_to_db,
             "updated_in_db" : updated_in_db,
@@ -393,11 +396,6 @@ def update_all(): # import html files from UG chromium bookmarks
             "errors_add_to_db" : errors_add_to_db,
             "imports" : imports,
             "errors_imports" : errors_imports}
-                # "errors_added2db" : errors_added2db}
-        # return {"imports" : imports, "added2db" : added2db, "errors" : errors}
-    #     print("{}Successfull{}".format(color.GREEN, color.END))
-    # else:
-    #     print(CHROMIUM_BOOKMARKS, "doesn't exist, nothing was imported")
 
 def format_content(content):
     return content.replace("[ch]", "<b>").replace("[/ch]", "</b>")

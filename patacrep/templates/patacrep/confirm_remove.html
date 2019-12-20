@@ -204,10 +204,7 @@
           },
           dataType: 'json',
           success: function (data) {
-            // window.location.href = '{% url "patacrep:confirm_remove" 0 %}'.replace('0', data.pkid);
-            // if (data.is_taken) {
-            //   alert("Successfully modified : " + data.pkid);
-            // }
+            window.location.href = '{% url "patacrep:confirm_remove" 0 %}'.replace('0', data.pkid);
           }
         });
       });

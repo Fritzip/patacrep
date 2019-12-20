@@ -7,14 +7,15 @@ class Chord(models.Model):
     artist = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
     capo = models.IntegerField()
-    nbcol = models.IntegerField()
     edited = models.BooleanField(default=False)
     favorite = models.BooleanField(default=False)
     chords = models.CharField(max_length=100)
     content = models.TextField(blank=False)
     file = models.FileField()
-    removed_content_confirmation = models.CharField(blank=True, max_length=200)
+    deleted_lines = models.CharField(blank=True, max_length=200)
     warning_lines = models.CharField(blank=True, max_length=200)
+    handled_lines = models.CharField(blank=True, max_length=200)
+
     comment = models.TextField(blank=True)
     NOTES = (        
         ("-", "-"),
