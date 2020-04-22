@@ -1,6 +1,7 @@
-import datetime
+import datetime, os
 
 from django.db import models
+from django.dispatch import receiver
 from django.utils import timezone
 
 class Chord(models.Model):
@@ -42,6 +43,13 @@ class Chord(models.Model):
 
     def __str__(self):
         return self.title + ' - ' + self.artist
+
+
+@receiver(models.signals.post_delete, sender=Chord)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    if instance.file:
+        if os.path.isfile(instance.file.path):
+            os.remove(instance.file.path)
 
 from django.forms import ModelForm
 

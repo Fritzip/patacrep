@@ -9,6 +9,7 @@ app_name = 'patacrep'
 urlpatterns = [
     path('', views.index, name='index'),
     path('<int:pk>/', views.ChordDetail.as_view(), name='detail'),
+    path('<int:pk>/delete', views.ChordDelete.as_view(), name='delete'),
     path('ajax/toggle_favorite/', views.toggle_favorite, name='ajax_toggle_favorite'),
     path('ajax/toggle_edited/', views.toggle_edited, name='ajax_toggle_edited'),
     path('ajax/change_start_note/', views.change_start_note, name='ajax_change_start_note'),

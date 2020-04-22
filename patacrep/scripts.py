@@ -26,18 +26,15 @@ USER       = os.path.expanduser("~")
 ROOTDIR    = os.path.dirname(os.path.realpath(__file__))
 BOOKDIR    = os.path.join(ROOTDIR,"books")
 WDIR       = os.path.join(ROOTDIR,"data")
-TODODIR    = os.path.join(WDIR,"html")
-EXTRACTDIR = os.path.join(WDIR,"txt")
+HTMLDIR    = os.path.join(WDIR,"html")
+JSONDIR    = os.path.join(WDIR,"json")
 # MANUDIR    = os.path.join(WDIR,"02edited-txt")
 # DONEDIR    = os.path.join(ROOTDIR,"songs","00_auto_import_test")
-DONEDIR    = os.path.join(WDIR,"sg")
 
-if not os.path.exists(TODODIR):
-    os.makedirs(TODODIR)
-if not os.path.exists(EXTRACTDIR):
-    os.makedirs(EXTRACTDIR)
-if not os.path.exists(DONEDIR):
-    os.makedirs(DONEDIR)
+if not os.path.exists(HTMLDIR):
+    os.makedirs(HTMLDIR)
+if not os.path.exists(JSONDIR):
+    os.makedirs(JSONDIR)
 
 h = HTMLParser()
 
@@ -82,9 +79,8 @@ def import_from_ug():
         # print("Found {} Ultimate Guitar urls".format(len(urls)))
         cpt = 0
         for url in urls:
-            if not os.path.isfile(os.path.join(TODODIR,os.path.basename(url))):
-                # print(url)
-                cmd = "wget -q -U firefox -P \"" + TODODIR + "\" \"" + url + "\""
+            if not os.path.isfile(os.path.join(HTMLDIR,os.path.basename(url))):
+                cmd = "wget -q -U firefox -P \"" + HTMLDIR + "\" \"" + url + "\""
                 if os.system(cmd) != 0:
                     errors_imports.append(url)
                     continue
@@ -99,10 +95,13 @@ def ug_old_import(j):
     title = j["data"]["tab"]["song_name"].replace("&","and")
     try: capo = j["data"]["tab_view"]["meta"]["capo"]
     except: capo = 0
-    content = j["data"]["tab_view"]["wiki_tab"]["content"].strip(),
-    chords = ", ".join(list(j["data"]["tab_view"]["applicature"].keys()))
-
-    return artist, title, capo, content, chords
+    content = j["data"]["tab_view"]["wiki_tab"]["content"].strip()
+    try: chords = ", ".join(list(j["data"]["tab_view"]["applicature"].keys()))
+    except: chords = ""
+    guitar_type = j["data"]["tab"]["type"]
+    votes = j["data"]["tab"]["votes"]
+    rating = j["data"]["tab"]["rating"]
+    return artist, title, capo, content, chords, guitar_type, votes, rating
 
 def ug_new_import(j):
     artist = j["store"]["page"]["data"]["tab"]["artist_name"]
@@ -110,9 +109,12 @@ def ug_new_import(j):
     try: capo = j["store"]["page"]["data"]["tab_view"]["meta"]["capo"]
     except: capo = 0
     content = j["store"]["page"]["data"]["tab_view"]["wiki_tab"]["content"].replace("[tab]", "").replace("[/tab]", "").strip()
-    chords = ", ".join(list(j["store"]["page"]["data"]["tab_view"]["applicature"].keys()))
-
-    return artist, title, capo, content, chords
+    try: chords = ", ".join(list(j["store"]["page"]["data"]["tab_view"]["applicature"].keys()))
+    except: chords=""
+    guitar_type = j["store"]["page"]["data"]["tab"]["type"]
+    votes = j["store"]["page"]["data"]["tab"]["votes"]
+    rating = j["store"]["page"]["data"]["tab"]["rating"]
+    return artist, title, capo, content, chords, guitar_type, votes, rating
 
 
 def add_to_db(imports=[]):
@@ -121,8 +123,8 @@ def add_to_db(imports=[]):
     already_in_db = []
     duplicates = []
     errors = []
-    for filename in os.listdir(TODODIR):
-        fr = open(os.path.join(TODODIR, filename),"r")
+    for filename in os.listdir(HTMLDIR):
+        fr = open(os.path.join(HTMLDIR, filename),"r")
         html2txt = "\n".join(fr.readlines())
         txt2json = re.findall(patt_json_extract, html2txt)
 
@@ -141,9 +143,13 @@ def add_to_db(imports=[]):
             ug_new_imported_tab = True
 
         j = json.loads(txt2json[0])
+        # Export to json
+        with open(os.path.join(JSONDIR, filename)+".json", 'w') as outfile:
+            json.dump(j, outfile)
+            
         fr.close()
 
-        artist, title, capo, content, chords = get_metadata(j)
+        artist, title, capo, content, chords, guitar_type, votes, rating = get_metadata(j)
 
         try:
             chord = Chord.objects.get(artist=artist, title=title)
@@ -156,7 +162,7 @@ def add_to_db(imports=[]):
                 chord.edited=False
                 chord.chords=chords
                 chord.content=content
-                chord.file=os.path.join(TODODIR, filename)
+                chord.file=os.path.join(HTMLDIR, filename)
                 chord.save()
                 updated_in_db.append(chord.pk)
             else:    
@@ -172,7 +178,7 @@ def add_to_db(imports=[]):
                            edited=False,
                            chords=chords,
                            content=content,
-                           file=os.path.join(TODODIR, filename))
+                           file=os.path.join(HTMLDIR, filename))
             chord.save()
             new_to_db.append(chord.pk)
 
@@ -275,19 +281,17 @@ def clean_empty_lines_at_begin_and_end(chord):
 def clean_chord(chord_id):
     chord = Chord.objects.get(pk=chord_id)
 
-    if chord.edited:
+    if chord.edited: # do not clean chords that has been manually edited
         return
 
     warning_lines = []
     deleted_lines = []
-
 
     # /!\ hard operations that breaks line indexing
     if chord.deleted_lines == "" and chord.warning_lines == "" and chord.handled_lines == "":
         clean_odd_or_even_line_breaks(chord)
         clean_multiple_line_breaks(chord)
         clean_empty_lines_at_begin_and_end(chord)
-
 
     lcontent = chord.content.split('\n')
 

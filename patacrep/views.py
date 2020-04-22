@@ -99,6 +99,17 @@ class ChordDetail(DetailView):
 
         return context
 
+from django.urls import reverse_lazy
+from django.views.generic import DeleteView
+from django.contrib.auth.mixins import UserPassesTestMixin
+
+class ChordDelete(UserPassesTestMixin, DeleteView):
+    model = Chord
+    success_url = reverse_lazy('patacrep:index')
+
+    def test_func(self):
+        return self.request.user.is_superuser and not self.get_object().edited
+
 from django.contrib.auth.decorators import login_required
 
 def toggle_favorite(request):

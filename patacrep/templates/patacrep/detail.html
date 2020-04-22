@@ -22,6 +22,10 @@
 
 {% block buttons %}
   {% if user.is_superuser %}
+  <a role="button" class="btn btn-danger" id="delete"><i class="fas fa-trash-alt"></i></a>
+  <form method="POST" id="delete-form" action="{% url 'patacrep:delete' chord.id %}" style="display: none;">
+   {% csrf_token %}
+  </form>
   <a role="button" class="btn btn-danger" id="edit_state"><i class="fas {% if chord.edited %}fa-lock{% else %}fa-unlock-alt{% endif %}"></i></a>
   <a role="button" class="btn btn-danger" id="clean"><i class="fas fa-broom"></i></a>
   {% endif %}
@@ -195,6 +199,9 @@
         });
       });
 
+      $("#delete").click(function(){
+        $("#delete-form").submit();
+      });
 
       $(document).on('click', '#clean', function(){
         $.ajax({
