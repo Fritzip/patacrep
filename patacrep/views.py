@@ -14,7 +14,7 @@ def get_chord_name_from_id(pkid):
     return str(Chord.objects.get(pk=pkid))
 
 def index(request):
-    chords_list = Chord.objects.values('id','artist','title','favorite','in_project','edited','warning_lines').order_by('artist')
+    chords_list = Chord.objects.values('chord_id','artist','title','favorite','in_project','edited','warning_lines').order_by('artist')
     dartist = {}
     for chord in chords_list:
         try:
@@ -71,8 +71,8 @@ class ChordDetail(DetailView):
         context = super(ChordDetail, self).get_context_data(**kwargs)
         context['form'] = ChordForm
 
-        sorted_chord_list = list(Chord.objects.order_by('artist', 'title').values_list('id', flat=True))
-        idx = sorted_chord_list.index(self.object.id)
+        sorted_chord_list = list(Chord.objects.order_by('artist', 'title').values_list('chord_id', flat=True))
+        idx = sorted_chord_list.index(self.object.chord_id)
 
         next_id = None
         prev_id = None
@@ -89,11 +89,11 @@ class ChordDetail(DetailView):
         context['prev'] = prev_id
         context['rand'] = rand_id
 
-        qs_other_chord_of_artist = Chord.objects.filter(artist=self.object.artist).exclude(id=self.object.id)
+        qs_other_chord_of_artist = Chord.objects.filter(artist=self.object.artist).exclude(pk=self.object.chord_id)
         other_chord_of_artist = []
 
         for ch in qs_other_chord_of_artist:
-            other_chord_of_artist.append((ch.id, ch.title))
+            other_chord_of_artist.append((ch.chord_id, ch.title))
 
         context['other_chords'] = other_chord_of_artist
 

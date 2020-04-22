@@ -5,6 +5,8 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 class Chord(models.Model):
+    chord_id = models.AutoField(primary_key=True)
+    song_id = models.PositiveIntegerField()
     artist = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
     capo = models.IntegerField()
@@ -44,8 +46,8 @@ class Chord(models.Model):
     rating = models.FloatField(blank=True, null=True)
 
 
-    class Meta:
-        unique_together = ('artist', 'title')
+    # class Meta:
+    #     unique_together = ('artist', 'title')
 
     def __str__(self):
         return self.title + ' - ' + self.artist

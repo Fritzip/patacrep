@@ -91,6 +91,8 @@ def import_from_ug():
 
 
 def ug_old_import(j):
+    chord_id = j["data"]["tab"]["id"]
+    song_id = j["data"]["tab"]["song_id"]
     artist = j["data"]["tab"]["artist_name"].replace("&","and")
     title = j["data"]["tab"]["song_name"].replace("&","and")
     try: capo = j["data"]["tab_view"]["meta"]["capo"]
@@ -101,9 +103,11 @@ def ug_old_import(j):
     guitar_type = j["data"]["tab"]["type"]
     votes = j["data"]["tab"]["votes"]
     rating = j["data"]["tab"]["rating"]
-    return artist, title, capo, content, chords, guitar_type, int(votes), float(rating)
+    return int(chord_id), int(song_id), artist, title, capo, content, chords, guitar_type, int(votes), float(rating)
 
 def ug_new_import(j):
+    chord_id = j["store"]["page"]["data"]["tab"]["id"]
+    song_id = j["store"]["page"]["data"]["tab"]["song_id"]
     artist = j["store"]["page"]["data"]["tab"]["artist_name"]
     title = j["store"]["page"]["data"]["tab"]["song_name"]
     try: capo = j["store"]["page"]["data"]["tab_view"]["meta"]["capo"]
@@ -114,7 +118,7 @@ def ug_new_import(j):
     guitar_type = j["store"]["page"]["data"]["tab"]["type"]
     votes = j["store"]["page"]["data"]["tab"]["votes"]
     rating = j["store"]["page"]["data"]["tab"]["rating"]
-    return artist, title, capo, content, chords, guitar_type, int(votes), float(rating)
+    return int(chord_id), int(song_id), artist, title, capo, content, chords, guitar_type, int(votes), float(rating)
 
 
 def add_to_db(imports=[]):
@@ -149,15 +153,16 @@ def add_to_db(imports=[]):
             
         fr.close()
 
-        artist, title, capo, content, chords, guitar_type, votes, rating = get_metadata(j)
-
+        chord_id, song_id, artist, title, capo, content, chords, guitar_type, votes, rating = get_metadata(j)
         try:
-            chord = Chord.objects.get(artist=artist, title=title)
-            if filename in imports or FORCE: # if the html file has just been imported but the chord already exist (reimport), update the existing 
+            chord = Chord.objects.get(chord_id=chord_id)
+            if filename in imports or FORCE : # if the html file has just been imported but the chord already exist (reimport), update the existing 
                 if os.path.basename(chord.file.name) != filename:
-                    duplicates.append( (chord.pk, os.path.basename(chord.file.name)) )                
-                chord.artist=artist
-                chord.title=title
+                    duplicates.append( (chord.pk, os.path.basename(chord.file.name)) )       
+                chord.chord_id = chord_id
+                chord.song_id = song_id   
+                # chord.artist=artist
+                # chord.title=title
                 chord.capo=capo
                 # chord.edited=False
                 chord.chords=chords
@@ -168,14 +173,16 @@ def add_to_db(imports=[]):
                 chord.file=os.path.join(HTMLDIR, filename)
                 chord.save()
                 updated_in_db.append(chord.pk)
-            else:    
+            else: 
                 if os.path.basename(chord.file.name) != filename:
                     duplicates.append( (chord.pk, filename) )
                 else:
                     already_in_db.append(chord.pk)
 
         except Chord.DoesNotExist:
-            chord = Chord( artist=artist,
+            chord = Chord( chord_id=chord_id,
+                           song_id=song_id,
+                           artist=artist,
                            title=title,
                            capo=capo,
                            edited=False,
