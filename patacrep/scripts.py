@@ -28,8 +28,6 @@ BOOKDIR    = os.path.join(ROOTDIR,"books")
 WDIR       = os.path.join(ROOTDIR,"data")
 HTMLDIR    = os.path.join(WDIR,"html")
 JSONDIR    = os.path.join(WDIR,"json")
-# MANUDIR    = os.path.join(WDIR,"02edited-txt")
-# DONEDIR    = os.path.join(ROOTDIR,"songs","00_auto_import_test")
 
 if not os.path.exists(HTMLDIR):
     os.makedirs(HTMLDIR)
@@ -37,6 +35,8 @@ if not os.path.exists(JSONDIR):
     os.makedirs(JSONDIR)
 
 h = HTMLParser()
+
+FORCE = False
 
 def comma_sep_int_string_to_list(s):
     return list(map(int, s.split(', '))) if s != "" else []
@@ -101,7 +101,7 @@ def ug_old_import(j):
     guitar_type = j["data"]["tab"]["type"]
     votes = j["data"]["tab"]["votes"]
     rating = j["data"]["tab"]["rating"]
-    return artist, title, capo, content, chords, guitar_type, votes, rating
+    return artist, title, capo, content, chords, guitar_type, int(votes), float(rating)
 
 def ug_new_import(j):
     artist = j["store"]["page"]["data"]["tab"]["artist_name"]
@@ -114,7 +114,7 @@ def ug_new_import(j):
     guitar_type = j["store"]["page"]["data"]["tab"]["type"]
     votes = j["store"]["page"]["data"]["tab"]["votes"]
     rating = j["store"]["page"]["data"]["tab"]["rating"]
-    return artist, title, capo, content, chords, guitar_type, votes, rating
+    return artist, title, capo, content, chords, guitar_type, int(votes), float(rating)
 
 
 def add_to_db(imports=[]):
@@ -153,7 +153,7 @@ def add_to_db(imports=[]):
 
         try:
             chord = Chord.objects.get(artist=artist, title=title)
-            if filename in imports: # if the html file has just been imported but the chord already exist (reimport), update the existing 
+            if filename in imports or FORCE: # if the html file has just been imported but the chord already exist (reimport), update the existing 
                 if os.path.basename(chord.file.name) != filename:
                     duplicates.append( (chord.pk, os.path.basename(chord.file.name)) )                
                 chord.artist=artist
@@ -162,6 +162,9 @@ def add_to_db(imports=[]):
                 chord.edited=False
                 chord.chords=chords
                 chord.content=content
+                chord.guitar_type=guitar_type
+                chord.votes=votes
+                chord.rating=rating
                 chord.file=os.path.join(HTMLDIR, filename)
                 chord.save()
                 updated_in_db.append(chord.pk)
@@ -178,43 +181,14 @@ def add_to_db(imports=[]):
                            edited=False,
                            chords=chords,
                            content=content,
+                           guitar_type=guitar_type,
+                           votes=votes,
+                           rating=rating,
                            file=os.path.join(HTMLDIR, filename))
             chord.save()
             new_to_db.append(chord.pk)
 
     return new_to_db, updated_in_db, list(set(already_in_db)), duplicates, errors
-
-    # jout["lowtitle"] = unidecode.unidecode(jout["title"].lower().replace(" ","_"))
-    # jout["lowartist"] = unidecode.unidecode(jout["artist"].lower().replace(" ","_"))
-
-    # if not os.path.exists(os.path.join(EXTRACTDIR,jout["lowartist"],jout["lowtitle"])+".txt") or FORCE:
-    #    # not os.path.exists(os.path.join(MANUDIR   ,jout["lowartist"],jout["lowtitle"])+".json"):
-    #     if not os.path.exists(os.path.join(EXTRACTDIR,jout["lowartist"])):
-    #         os.makedirs(os.path.join(EXTRACTDIR,jout["lowartist"]))
-    #     print("==> {}{:.20}{}, {:.20}".format(color.BOLD, jout["artist"],color.END,jout["title"]))
-    #     cpt += 1
-        
-    #     jout["nb_column"] = 1
-    #     jout["edited"] = 0
-    #     jout["chords"] = list(j["data"]["tab_view"]["applicature"].keys())
-    #     # jout["d_chords"] = j["data"]["tab_view"]["applicature"]
-
-    #     for chord in j["data"]["tab_view"]["applicature"]:
-    #         if chord not in d_chords:
-    #             d_chords[chord] = j["data"]["tab_view"]["applicature"][chord]
-
-    #     fw = open(os.path.join(EXTRACTDIR,jout["lowartist"],jout["lowtitle"])+".txt","w")
-        
-    #     fw.write("[METADATA]\n")
-    #     fw.write("title : {}\n".format(jout["title"].strip()))
-    #     fw.write("artist : {}\n".format(jout["artist"].strip()))
-    #     fw.write("lowtitle : {}\n".format(jout["lowtitle"].strip()))
-    #     fw.write("lowartist : {}\n".format(jout["lowartist"].strip()))
-    #     fw.write("capo : {}\n".format(jout["capo"]))
-    #     fw.write("nb_column : {}\n".format(jout["nb_column"]))
-    #     fw.write("chords : {}\n".format(jout["chords"]))
-    #     fw.write("edited : {}\n".format(jout["edited"]))
-    #     fw.write("[ENDMETADATA]\n")
 
 def clean_odd_or_even_line_breaks(chord):
     lcontent = chord.content.split('\n')

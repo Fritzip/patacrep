@@ -8,8 +8,10 @@ class Chord(models.Model):
     artist = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
     capo = models.IntegerField()
+    capo_perso = models.IntegerField(blank=True, null=True)
     edited = models.BooleanField(default=False)
     favorite = models.BooleanField(default=False)
+    in_project = models.BooleanField(default=False)
     chords = models.CharField(max_length=100)
     content = models.TextField(blank=False)
     file = models.FileField()
@@ -36,6 +38,10 @@ class Chord(models.Model):
     start_note = models.CharField(max_length=2,
                   choices=NOTES,
                   default="-")
+
+    guitar_type = models.CharField(max_length=100, blank=True, null=True)
+    votes = models.IntegerField(blank=True, null=True)
+    rating = models.FloatField(blank=True, null=True)
 
 
     class Meta:
