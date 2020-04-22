@@ -1,8 +1,7 @@
 #db.sqlite3
-*.old
 *.pyc
 *.swp
-*/migrations/
+migrations/
 /static/
 patacrep/data/
 #patacrep/static/external/
