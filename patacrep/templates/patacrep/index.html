@@ -19,12 +19,16 @@
   {% for artist, chords in dartist.items %}
       <span class="artist-header"><span class="font-weight-bold artist" id="{{ artist | slugify }}">{{ artist }}</span>
       {% for chord in chords %}
-        <span class="chord {% if forloop.last %}bottom-rounded{%endif%}" data-artist="{{artist | slugify }}"><a href="{% url 'patacrep:detail' chord.id %}">{{ chord.title }}</a>
-          {% if chord.warning_lines and user.is_superuser %}
-            <a href="{% url 'patacrep:confirm_remove' chord.id %}" class="badge badge-warning float-right mx-1"><i class="fas fa-exclamation-triangle"></i></a>
+        <span class="chord {% if forloop.last %}bottom-rounded{%endif%}" data-artist="{{artist | slugify }}">
+          {% if chord.in_project %}
+            <i class="fas fa-hammer checked"></i>
           {% endif %}
           {% if chord.favorite %}
-            <i class="fas fa-star mx-1" style="color:yellow"></i>
+            <i class="fas fa-star checked"></i>
+          {% endif %}
+          <a href="{% url 'patacrep:detail' chord.id %}" style="margin-right: auto">{{ chord.title }}</a>
+          {% if chord.warning_lines and user.is_superuser %}
+            <a href="{% url 'patacrep:confirm_remove' chord.id %}" class="badge badge-warning float-right mx-1"><i class="fas fa-exclamation-triangle"></i></a>
           {% endif %}
         </span>
         {% if forloop.first %}

@@ -2,10 +2,15 @@
 {% load static %}
 
 {% block pagetitle %}
-{% if chord.favorite %}
-    <i class="fas fa-star" style="color:yellow"></i>
+{% if chord.in_project %}
+    <i class="fas fa-hammer checked {% if user.is_superuser %}checkable{% endif %}"></i>
 {% else %}
-    <i class="far fa-star"></i>
+    <i class="fas fa-hammer {% if user.is_superuser %}checkable{% endif %}"></i>
+{% endif %}
+{% if chord.favorite %}
+    <i class="fas fa-star checked {% if user.is_superuser %}checkable{% endif %}"></i>
+{% else %}
+    <i class="fas fa-star {% if user.is_superuser %}checkable{% endif %}"></i>
 {% endif %}
 <span>{{ chord.title }}</span>
 <div class="dropdown">
@@ -132,13 +137,49 @@
           success: function (data) {
             if(data['success']) {
               if (data['added']) {
-                $(star).attr('data-prefix', 'fas');
-                $(star).css('color', 'yellow');
+                // $(star).attr('data-prefix', 'fas');
+                // $(star).css('color', 'yellow');
+                $(star).addClass("checked");
               } else {
-                $(star).attr('data-prefix', 'far');
-                $(star).css('color', 'unset');
+                $(star).removeClass("checked");
+                // $(star).attr('data-prefix', 'far');
+                // $(star).css('color', 'unset');
               }
-              $(star).toggleClass('fas').toggleClass('far');
+              // $(star).toggleClass('fas').toggleClass('far');
+            }
+            var notiftype = data['success'] ? 'success' : 'warning';
+            var notif = $.notify({
+              message: data['message'],
+            }, $.extend(settings,{type:notiftype}));
+            notif.$ele.on('click', function() {
+              notif.close();
+            });
+          }
+        });
+      });
+
+      $(document).on('click', '.fa-hammer', function(){
+        var hammer = $(this);
+        $.ajax({
+          url: '{% url "patacrep:ajax_toggle_project" %}',
+          type: "POST",
+          data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              'chord_pk': '{{chord.pk}}',
+          },
+          dataType: 'json',
+          success: function (data) {
+            if(data['success']) {
+              if (data['added']) {
+                // $(hammer).attr('data-prefix', 'fas');
+                // $(hammer).css('color', 'red');
+                $(hammer).addClass("checked");
+              } else {
+                // $(hammer).attr('data-prefix', 'far');
+                $(hammer).removeClass("checked");
+                // $(hammer).css('color', 'unset');
+              }
+              // $(hammer).toggleClass('fas').toggleClass('far');
             }
             var notiftype = data['success'] ? 'success' : 'warning';
             var notif = $.notify({

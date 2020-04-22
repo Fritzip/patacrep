@@ -14,7 +14,7 @@ def get_chord_name_from_id(pkid):
     return str(Chord.objects.get(pk=pkid))
 
 def index(request):
-    chords_list = Chord.objects.values('id','artist','title','favorite','edited','warning_lines').order_by('artist')
+    chords_list = Chord.objects.values('id','artist','title','favorite','in_project','edited','warning_lines').order_by('artist')
     dartist = {}
     for chord in chords_list:
         try:
@@ -127,6 +127,31 @@ def toggle_favorite(request):
             message = "Successfully added to favorite"
         else:
             message = "Successfully removed from favorite"
+    else:
+        message = "You need admin privilege for that"
+
+    data = {
+        'added' : added,
+        'success' : success,
+        'message': message
+    }
+    return JsonResponse(data)
+
+def toggle_project(request):
+    success = False
+    added = False
+    message = ""
+    if request.user.is_superuser:
+        chord_pk = request.POST['chord_pk']
+        chord = get_object_or_404(Chord, pk=chord_pk)
+        chord.in_project = not chord.in_project
+        added = chord.in_project
+        chord.save()
+        success = True
+        if chord.in_project:
+            message = "Successfully added to project"
+        else:
+            message = "Successfully removed from project"
     else:
         message = "You need admin privilege for that"
 

@@ -50,9 +50,17 @@ a.website-name {
   color: unset;
 }
 
-a.website-name:hover, .menu-toggle:hover, .fa-star:hover {
+a.website-name:hover, .menu-toggle:hover, .fa-star:hover, .fa-star.checked {
   color:#fbff4b;
   text-decoration: none;
+}
+
+.fa-hammer:hover, .fa-hammer.checked {
+  color: #DC3545;
+}
+
+.fa-hammer.checked.checkable:hover, .fa-star.checked.checkable:hover {
+  opacity: 0.5;
 }
 
 .page-title {
@@ -187,8 +195,8 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover {
 
 .chord {
   display: flex;
-  align-items: center;
-  justify-content: space-between
+  /*align-items: center;*/
+  /*justify-content: space-between*/
 }
 
 .bottom-rounded {
