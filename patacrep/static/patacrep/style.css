@@ -259,7 +259,7 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover, .fa-star.checked {
   border: none;
 }
 
-input.capo-perso {
+input.capo-perso, .start-note-perso {
   background-color: #e29786 !important;
 }
 

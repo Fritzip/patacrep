@@ -71,7 +71,7 @@
     <div class="input-group-prepend" data-toggle="tooltip" data-placement="left" data-html="true" title="1<sup>st</sup> note">
       <label class="input-group-text" for="start-note-selector"><i class="icon-music-note"></i></label>
     </div>
-    <select class="form-control shadow-none {% if chord.start_note != '-'%}capo-perso{%endif%}" id="start-note-selector">
+    <select class="form-control shadow-none {% if chord.start_note != '-'%}start-note-perso{%endif%}" id="start-note-selector" data-start-note="{{chord.start_note}}">
       {% for value, text in form.start_note.field.choices %}
         {% if value == chord.start_note %}
           <option selected="{{ value }}">{{text}}</option>
@@ -193,7 +193,8 @@
       });
 
       $(document).on('change', '#start-note-selector', function() {
-        var new_start_note_value = $('#start-note-selector').val();
+        var $selector = $('#start-note-selector');
+        var new_start_note_value = $selector.val();
         $.ajax({
           url: '{% url "patacrep:ajax_change_start_note" %}',
           type: "POST",
@@ -204,6 +205,13 @@
           },
           dataType: 'json',
           success: function (data) {
+            if (data['success']) {
+              if($selector.val() != '-') {
+                $selector.addClass("start-note-perso");
+              } else {
+                $selector.removeClass("start-note-perso");
+              }
+            }
             var notiftype = data['success'] ? 'success' : 'warning';
             var notif = $.notify({
               message: data['message'],
@@ -312,17 +320,10 @@
         },
         dataType: 'json',
         success: function (data) {
-          // console.log(data.pkid);
           window.location.href = '{% url "patacrep:detail" 0 %}'.replace('0', data.pkid);
-          // location.href = "http://www.example.com/ThankYou.html"; 
-          // if (data.is_taken) {
-          //   alert("Successfully modified : " + data.pkid);
-          // }
         }
       });
     });
-
-
 
     $(".capo-prepend").mouseover(function() {
       var $input = $(this).next();
