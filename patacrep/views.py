@@ -205,6 +205,24 @@ def change_start_note(request):
     }
     return JsonResponse(data)
 
+def change_capo(request):
+    success = False
+    message = ""
+    if request.user.is_superuser:
+        chord_pk = request.POST['chord_pk']
+        chord = get_object_or_404(Chord, pk=chord_pk)
+        chord.capo_perso = request.POST['new_capo']
+        chord.save()
+        message = "Capo perso set to : {}".format(chord.capo_perso)
+        success = True
+    else:
+        message = "You need admin privilege for that"
+    data = {
+        'success': success,
+        'message': message,
+    }
+    return JsonResponse(data)
+
 @login_required
 def clean(request):
     chord_pk = request.POST['chord_pk']

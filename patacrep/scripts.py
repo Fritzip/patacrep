@@ -148,8 +148,8 @@ def add_to_db(imports=[]):
 
         j = json.loads(txt2json[0])
         # Export to json
-        with open(os.path.join(JSONDIR, filename)+".json", 'w') as outfile:
-            json.dump(j, outfile)
+        # with open(os.path.join(JSONDIR, filename)+".json", 'w') as outfile:
+            # json.dump(j, outfile)
             
         fr.close()
 

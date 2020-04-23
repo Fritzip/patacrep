@@ -62,16 +62,16 @@
 
 {% block infotab %}
   <div class="input-group">
-    <div class="input-group-prepend" data-toggle="tooltip" data-placement="left" title="Capo">
+    <div class="input-group-prepend capo-prepend" data-toggle="tooltip" data-placement="left" title="Capo (click to reset to original)">
       <label class="input-group-text"><i class="icon-capo"></i></label>
     </div>
-    <input type="number" class="form-control shadow-none" min="0" step="1" id="capo-selector" aria-label="Capo" value="{% if chord.capo < 0%}0{% else %}{{chord.capo}}{% endif %}" />
+    <input type="number" class="form-control shadow-none {% if chord.capo_perso != chord.capo %}capo-perso{%endif%}" min="0" max="30" step="1" id="capo-selector" aria-label="Capo" data-capo="{{chord.capo}}" data-capoperso="{{chord.capo_perso}}" value="{% if chord.capo_perso != chord.capo %}{{chord.capo_perso}}{% else %}{{chord.capo}}{% endif %}" />
   </div>
   <div class="input-group">
     <div class="input-group-prepend" data-toggle="tooltip" data-placement="left" data-html="true" title="1<sup>st</sup> note">
       <label class="input-group-text" for="start-note-selector"><i class="icon-music-note"></i></label>
     </div>
-    <select class="form-control shadow-none" id="start-note-selector">
+    <select class="form-control shadow-none {% if chord.start_note != '-'%}capo-perso{%endif%}" id="start-note-selector">
       {% for value, text in form.start_note.field.choices %}
         {% if value == chord.start_note %}
           <option selected="{{ value }}">{{text}}</option>
@@ -215,6 +215,45 @@
         });
       });
 
+
+      $(document).on('blur', '#capo-selector', function() {
+        var $input = $('#capo-selector');
+        var new_capo_value = $input.val();
+        if (Number($input.data("capoperso"))==new_capo_value) {
+          return false;
+        }
+        $.ajax({
+          url: '{% url "patacrep:ajax_change_capo" %}',
+          type: "POST",
+          data: {
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+              'chord_pk': '{{chord.pk}}',
+              'new_capo': new_capo_value, 
+          },
+          dataType: 'json',
+          success: function (data) {
+            if (data['success']) {
+              $input.data("capoperso", new_capo_value);
+              if( $input.data("capoperso")!=$input.data("capo")) {
+                $input.addClass("capo-perso");
+              } 
+              else {
+                $input.removeClass("capo-perso");
+              }
+            } else {
+              $input.val($input.data("capoperso"));
+            }
+            var notiftype = data['success'] ? 'success' : 'warning';
+            var notif = $.notify({
+              message: data['message'],
+            }, $.extend(settings,{type:notiftype}));
+            notif.$ele.on('click', function() {
+              notif.close();
+            });
+          }
+        });
+      });
+
       $(document).on('click', '#edit_state', function(){
         var $btn = $(this);
         $.ajax({
@@ -241,7 +280,9 @@
       });
 
       $("#delete").click(function(){
-        $("#delete-form").submit();
+        if(confirm("Delete this chord. Are you sure ?")) {
+          $("#delete-form").submit();
+        }
       });
 
       $(document).on('click', '#clean', function(){
@@ -260,9 +301,6 @@
       });
     });
 
-  </script>
-
-  <script>
     $("#next").click(function () {
       var chord_pk = $(this).attr("chord_pk");
       $.ajax({
@@ -282,6 +320,25 @@
           // }
         }
       });
+    });
+
+
+
+    $(".capo-prepend").mouseover(function() {
+      var $input = $(this).next();
+      $input.removeClass("capo-perso");
+      $input.val($input.data("capo"));
+    });
+    $(".capo-prepend").mouseout(function() {
+      var $input = $(this).next();
+      if($input.data("capoperso") != $input.data("capo")) {
+        $input.addClass("capo-perso");
+        $input.val($input.data("capoperso"));
+      }
+    });
+    $(".capo-prepend").click(function() {
+      var $input = $(this).next();
+      $input.blur();
     });
   </script>
 

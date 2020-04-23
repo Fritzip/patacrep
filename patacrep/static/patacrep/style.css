@@ -255,6 +255,16 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover, .fa-star.checked {
   font-size: 14px;
   text-align: center;
   text-align-last:center;
+  font-weight: bold;
+  border: none;
+}
+
+input.capo-perso {
+  background-color: #e29786 !important;
+}
+
+.capo-prepend {
+  cursor: pointer !important;
 }
 
 .input-group {

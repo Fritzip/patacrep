@@ -1,4 +1,6 @@
-#db.sqlite3
+db.sqlite3
+db.json
+*.old
 *.pyc
 *.swp
 migrations/
