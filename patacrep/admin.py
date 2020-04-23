@@ -5,7 +5,9 @@ from .models import Chord
 # admin.site.register(Chord)
 
 class ChordAdmin(admin.ModelAdmin):
-    list_display=('chord_id','title','artist')
-    search_fields =('title','artist')
+    list_display=('title','artist', 'updated_at', 'created_at')
+    search_fields =('chord_id', 'title', 'artist')
+    list_filter = ('updated_at', 'created_at')
+    ordering = ('-created_at',)
 
 admin.site.register(Chord, ChordAdmin)

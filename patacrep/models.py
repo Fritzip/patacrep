@@ -9,8 +9,8 @@ class Chord(models.Model):
     song_id = models.PositiveIntegerField()
     artist = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
-    capo = models.IntegerField()
-    capo_perso = models.IntegerField(blank=True, null=True)
+    capo = models.IntegerField(default=0)
+    capo_perso = models.IntegerField(default=0)
     edited = models.BooleanField(default=False)
     favorite = models.BooleanField(default=False)
     in_project = models.BooleanField(default=False)
@@ -45,6 +45,8 @@ class Chord(models.Model):
     votes = models.IntegerField(blank=True, null=True)
     rating = models.FloatField(blank=True, null=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     # class Meta:
     #     unique_together = ('artist', 'title')
