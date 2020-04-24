@@ -15,25 +15,20 @@
 {% endblock options %}
 
 {% block content %}
-<div class="content">
+<div class="content list-group">
   {% for artist, chords in dartist.items %}
-      <span class="artist-header"><span class="font-weight-bold artist" id="{{ artist | slugify }}">{{ artist }}</span>
+      <span class="list-group-item list-group-item-secondary font-weight-bold artist mx-1 top-rounded" id="{{ artist | slugify }}">{{ artist }}</span>
       {% for chord in chords %}
-        <span class="chord {% if forloop.last %}bottom-rounded{%endif%}" data-artist="{{artist | slugify }}">
-          {% if chord.in_project %}
-            <i class="fas fa-hammer checked"></i>
+        <a href="{% url 'patacrep:detail' chord.chord_id %}" class="list-group-item list-group-item-action chord mx-1 {% if forloop.last %}bottom-rounded mb-2{%endif%} {% if chord.warning_lines and user.is_superuser %} list-group-item-warning {% endif %}" data-artist="{{artist | slugify }}">
+          {{ chord.title }}
+          {% if chord.in_project and user.is_superuser %}
+            <span class="badge badge-primary mx-1"><i class="fas fa-hammer checked"></i></span>
           {% endif %}
-          {% if chord.favorite %}
-            <i class="fas fa-star checked"></i>
+          {% if chord.favorite and user.is_superuser %}
+            <span class="badge badge-primary mx-1"><i class="fas fa-star checked"></i></span>
           {% endif %}
-          <a href="{% url 'patacrep:detail' chord.chord_id %}" style="margin-right: auto">{{ chord.title }}</a>
-          {% if chord.warning_lines and user.is_superuser %}
-            <a href="{% url 'patacrep:confirm_remove' chord.chord_id %}" class="badge badge-warning float-right mx-1"><i class="fas fa-exclamation-triangle"></i></a>
-          {% endif %}
-        </span>
-        {% if forloop.first %}
-          </span>
-        {% endif %}
+
+        </a>
       {% endfor %}
   {% endfor %}
 </div>
