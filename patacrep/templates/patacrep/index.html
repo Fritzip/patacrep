@@ -17,19 +17,13 @@
 {% block content %}
 <div class="content list-group">
   {% for artist, chords in dartist.items %}
-      <span class="list-group-item list-group-item-secondary font-weight-bold artist mx-1 top-rounded" id="{{ artist | slugify }}">{{ artist }}</span>
-      {% for chord in chords %}
-        <a href="{% url 'patacrep:detail' chord.chord_id %}" class="list-group-item list-group-item-action chord mx-1 {% if forloop.last %}bottom-rounded mb-2{%endif%} {% if chord.warning_lines and user.is_superuser %} list-group-item-warning {% endif %}" data-artist="{{artist | slugify }}">
-          {{ chord.title }}
-          {% if chord.in_project and user.is_superuser %}
-            <span class="badge badge-primary mx-1"><i class="fas fa-hammer checked"></i></span>
-          {% endif %}
-          {% if chord.favorite and user.is_superuser %}
-            <span class="badge badge-primary mx-1"><i class="fas fa-star checked"></i></span>
-          {% endif %}
-
-        </a>
-      {% endfor %}
+    <span class="list-group-item list-group-item-secondary font-weight-bold artist" id="{{ artist | slugify }}">{{ artist }}</span>
+    {% for chord in chords %}
+      <a href="{% url 'patacrep:detail' chord.chord_id %}" class="list-group-item list-group-item-action chord {% if forloop.last %}bottom-rounded{%endif%} {% if chord.warning_lines and user.is_superuser %} list-group-item-warning {% endif %}" data-artist="{{artist | slugify }}">
+          <span class="mx-1">{{ chord.title }}</span>
+          <span class="badge badge-secondary">{% if chord.in_project and user.is_superuser %}<i class="icon fas fa-hammer checked"></i>{% endif %}{% if chord.favorite and user.is_superuser %}<i class="icon fas fa-star checked"></i>{% endif %}</span>
+      </a>
+    {% endfor %}
   {% endfor %}
 </div>
 {% endblock %}
@@ -38,6 +32,8 @@
 {% block js %}
 {{block.super}}
 <script>
+  var NEED_BREAK_RM = true;
+
   $(document).ready(function(){
     $("#searchbar").on('input', function() {
       var search = $(this).val();
@@ -68,8 +64,39 @@
           });
         }
       });
+      if(!$(this).val()) {
+        specialWrap('.list-group-item');
+      } else if (NEED_BREAK_RM) {
+        $(".break").remove();
+        NEED_BREAK_RM = false;
+      }
     });
 
+    function wrap_artist_and_first_chord() {
+      $('.artist').each(function(){
+        if ($(this).next('.chord').next().hasClass('artist')) {
+          $(this).next('.chord').add(this).wrapAll('<span>');
+        } else {
+          $(this).next('.chord').addClass('not-last').add(this).wrapAll('<span class="artist-header">');
+        }
+      });      
+    }
+
+    // $("#searchbar").on('focus', function() {
+    //   $('.artist').each( function () {
+    //     if ($(this).parent().hasClass('artist-header')) {
+    //       $(this).unwrap();
+    //     }
+    //   });  
+    // });
+
+    // $("#searchbar").on('blur', function() {
+    //   if ($(this).val() == "") {
+    //     wrap_artist_and_first_chord();
+    //   }
+    // }); 
+
+    // wrap_artist_and_first_chord();
 
     function anchor_highlight(artist) {
         var $artist = $('.artist[id="'+artist+'"]');
@@ -106,5 +133,29 @@
     //     event.preventDefault();
     });
   });
+
+
+  function specialWrap(className) {
+    $(".break").remove();
+    var prevItem = {};
+    var currItem = {};
+    $(className+":visible").each(function() {
+      currItem = this.getBoundingClientRect();
+      if (!prevItem || prevItem.top >= currItem.top) {
+        if ($(this).prev().hasClass('artist')) {
+          $( "<span class='break'></span>" ).insertBefore( $(this).prev() );
+        }
+      }
+      prevItem = currItem;
+    });
+    NEED_BREAK_RM = true;
+  }
+
+  window.onload = function(event){
+    specialWrap('.list-group-item');
+  };
+  window.onresize = function() {
+    specialWrap('.list-group-item');
+  };
 </script>
 {% endblock %}

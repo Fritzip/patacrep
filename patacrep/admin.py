@@ -2,8 +2,6 @@ from django.contrib import admin
 
 from .models import Chord
 
-# admin.site.register(Chord)
-
 class ChordAdmin(admin.ModelAdmin):
     list_display=('title','artist', 'updated_at', 'created_at')
     search_fields =('chord_id', 'title', 'artist')
