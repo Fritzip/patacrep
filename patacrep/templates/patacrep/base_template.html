@@ -108,8 +108,10 @@
   
   <script>
     $(document).ready(function(){
-      $('.content').bind('mousewheel', function(e){ 
-        this.scrollLeft -= e.originalEvent.wheelDelta;
+      $('.content').bind('wheel', function(e){ 
+        // e.preventDefault();
+        var factor = e.originalEvent.deltaMode === 1 ? 16 : 1;
+        this.scrollLeft += factor*e.originalEvent.deltaY;
       });
     });
   </script>

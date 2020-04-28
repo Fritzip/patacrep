@@ -5,6 +5,15 @@ body {
   line-height: 1.1;
 }
 
+::-moz-focus-inner {
+  border: 0;
+}
+
+:focus { 
+    outline: none; 
+}
+
+
 span {
   background-color: none;
 }
@@ -342,7 +351,7 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover, .fa-star.checked {
   text-align: center;
   text-align-last:center;
   font-weight: bold;
-  border: none;
+  border: 0;
 }
 
 input.capo-perso, .start-note-perso {
