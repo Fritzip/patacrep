@@ -7,6 +7,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.views.generic import DetailView
 
+from datetime import datetime, timedelta
+
 from .models import Chord, ChordForm
 from .scripts import update_all, clean_chord, format_content, comma_sep_int_string_to_list, int_list_to_comma_sep_string
 
@@ -15,6 +17,8 @@ def get_chord_name_from_id(pkid):
 
 def index(request):
     chords_list = Chord.objects.values('chord_id','artist','title','favorite','in_project','edited','warning_lines').order_by('artist')
+    last_n_days = datetime.today() - timedelta(days=14)
+    last_created = Chord.objects.filter(created_at__gte=last_n_days).order_by('-created_at').values_list('chord_id', flat=True)[:30]
     dartist = {}
     for chord in chords_list:
         try:
@@ -22,7 +26,7 @@ def index(request):
         except :
             dartist[chord['artist']] = [chord]
 
-    context = {'dartist': dartist, 'nb_chords':Chord.objects.count(), 'nb_warn': Chord.objects.filter(~Q(warning_lines__exact='')).count()}
+    context = {'dartist': dartist, 'last_created': last_created, 'nb_chords':Chord.objects.count(), 'nb_warn': Chord.objects.filter(~Q(warning_lines__exact='')).count()}
 
     return render(request, 'patacrep/index.html', context)
 

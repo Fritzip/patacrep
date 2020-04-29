@@ -2,12 +2,27 @@
 {% load static %}
 
 {% block pagetitle %}
-  Index {% if user.is_superuser %}<span>{{ nb_chords }} chords</span><span>{{ nb_warn }} warnings</span>{% endif %}
+  <span>{{ nb_chords }} chords</span>{% if user.is_superuser %}<span>{{ nb_warn }} warnings</span>{% endif %}
 {% endblock %}
 
 {% block navbar_extra %}
-<form class="form-inline my-2 my-lg-0">
-  <input id="searchbar" class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+<div class="dropdown" id="filter-dropdown">
+  <button class="btn btn-secondary dropdown-toggle btn-sm shadow-none" type="button" id="dropdownFilterButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <i class="fas fa-filter"></i>
+  </button>
+  <div class="dropdown-menu text-center" id="dropdownMenuFilters" aria-labelledby="dropdownFilterButton">
+    <div class="btn-group btn-group-sm btn-group-toggle">
+      {% if user.is_superuser %}
+      <button type="button" id="favorite-filter" class="btn btn-primary shadow-none boolean-filter" data-toggle="button" aria-pressed="false" autocomplete="off"><i class="fas fa-star"></i></button>
+      <button type="button" id="project-filter" class="btn btn-primary shadow-none boolean-filter" data-toggle="button" aria-pressed="false" autocomplete="off"><i class="fas fa-hammer"></i></button>
+      <button type="button" id="warning-filter" class="btn btn-primary shadow-none boolean-filter" data-toggle="button" aria-pressed="false" autocomplete="off"><i class="fas fa-exclamation-triangle"></i></button>
+      {% endif %}
+      <button type="button" id="new-filter" class="btn btn-primary shadow-none boolean-filter" data-toggle="button" aria-pressed="false" autocomplete="off">new</button>
+    </div>
+  </div>
+</div>
+<form class="form-inline">
+  <input id="searchbar" class="form-control form-control-sm" type="search" placeholder="Search" aria-label="Search">
 </form>
 {% endblock navbar_extra %}
 
@@ -17,12 +32,23 @@
 {% block content %}
 <div class="content list-group">
   {% for artist, chords in dartist.items %}
-    <span class="list-group-item list-group-item-secondary font-weight-bold artist" id="{{ artist | slugify }}">{{ artist }}</span>
+    <span class="artist list-group-item list-group-item-secondary font-weight-bold" id="{{ artist | slugify }}">{{ artist }}</span>
     {% for chord in chords %}
-      <a href="{% url 'patacrep:detail' chord.chord_id %}" class="list-group-item list-group-item-action chord {% if forloop.last %}bottom-rounded{%endif%} {% if chord.warning_lines and user.is_superuser %} list-group-item-warning {% endif %}" data-artist="{{artist | slugify }}">
-          <span class="mx-1">{{ chord.title }}</span>
-          <span class="badge badge-secondary">{% if chord.in_project and user.is_superuser %}<i class="icon fas fa-hammer checked"></i>{% endif %}{% if chord.favorite and user.is_superuser %}<i class="icon fas fa-star checked"></i>{% endif %}</span>
-      </a>
+    <a href="{% url 'patacrep:detail' chord.chord_id %}"
+      class="chord list-group-item list-group-item-action
+      {% if forloop.last %} bottom-rounded {%endif%}
+      {% if user.is_superuser and chord.warning_lines %} list-group-item-warning {% endif %}"
+      data-artist="{{artist | slugify }}"
+      {% if user.is_superuser %}
+        data-favorite="{{chord.favorite|yesno:'1,0'}}"
+        data-project="{{chord.in_project|yesno:'1,0'}}"
+      {% endif %}
+      {% if chord.chord_id in last_created %}data-new="1"{% endif %}
+      >
+      <span class="mx-1 mr-auto">{{ chord.title }}</span>
+      <span class="badge badge-info ml-1">{% if chord.in_project and user.is_superuser %}<i class="icon fas fa-hammer"></i>{% endif %}{% if chord.favorite and user.is_superuser %}<i class="icon fas fa-star"></i>{% endif %}</span>
+      {% if chord.chord_id in last_created %}<span class="badge badge-info ml-1">new</span>{% endif %}
+    </a>
     {% endfor %}
   {% endfor %}
 </div>
@@ -132,8 +158,16 @@
         anchor_highlight(artist);
     //     event.preventDefault();
     });
-  });
 
+    $('#dropdownMenuFilters').on("click.bs.dropdown", function (e) { 
+      e.stopPropagation(); e.preventDefault();
+    });
+
+    $('.boolean-filter').click(function() {
+      $(this).button('toggle');
+      apply_filters();
+    });
+  });
 
   function specialWrap(className) {
     $(".break").remove();
@@ -149,6 +183,35 @@
       prevItem = currItem;
     });
     NEED_BREAK_RM = true;
+  }
+
+  function match_filters($el, fav, proj, is_new, warning) {
+    if((fav && $el.data('favorite')==1) || (proj && $el.data('project')==1) || (is_new && $el.data('new')==1) || (warning && $el.hasClass('list-group-item-warning'))) {
+      return true;
+    }
+    return false;
+  } 
+
+  function apply_filters() {
+    $(".break").remove();
+    $(".chord, .artist").show();
+    var favorite = $('#favorite-filter').hasClass('active');
+    var project = $('#project-filter').hasClass('active');
+    var is_new = $('#new-filter').hasClass('active');
+    var warning = $('#warning-filter').hasClass('active');
+    if (favorite || project || is_new || warning) {
+      $(".chord").each(function() {
+        if(!match_filters($(this), favorite, project, is_new, warning)) {
+          $(this).hide();
+        }
+      });
+      $('.artist').each(function (){
+        if(!$(this).nextAll(':visible:first').hasClass('chord')) {
+          $(this).hide();
+        }
+      });
+    }
+    specialWrap('.list-group-item');
   }
 
   window.onload = function(event){

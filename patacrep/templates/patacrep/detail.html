@@ -26,29 +26,21 @@
 {% endblock %}
 
 {% block buttons %}
-  {% if user.is_superuser %}
-  <a role="button" class="btn btn-danger" id="delete"><i class="fas fa-trash-alt"></i></a>
-  <form method="POST" id="delete-form" action="{% url 'patacrep:delete' chord.chord_id %}" style="display: none;">
-   {% csrf_token %}
-  </form>
-  <a role="button" class="btn btn-danger" id="edit_state"><i class="fas {% if chord.edited %}fa-lock{% else %}fa-unlock-alt{% endif %}"></i></a>
-  <a role="button" class="btn btn-danger" id="clean"><i class="fas fa-broom"></i></a>
-  {% endif %}
   {% if chord.warning_lines and user.is_superuser %}
-  <a role="button" class="btn btn-warning" href="{% url 'patacrep:confirm_remove' chord.chord_id %}"><i class="fas fa-exclamation-triangle"></i></a>
+  <a role="button" class="btn btn-warning shadow-none" href="{% url 'patacrep:confirm_remove' chord.chord_id %}"><i class="fas fa-exclamation-triangle"></i></a>
   {% elif user.is_superuser %}
-  <a role="button" class="btn btn-primary" href="{% url 'patacrep:confirm_remove' chord.chord_id %}"><i class="fas fa-edit"></i></a>
+  <a role="button" class="btn btn-primary shadow-none" href="{% url 'patacrep:confirm_remove' chord.chord_id %}"><i class="fas fa-edit"></i></a>
   {% endif %}
   {% if prev %}
-  <a role="button" class="btn btn-primary" href="{% url 'patacrep:detail' prev %}"><i class="fas fa-angle-left"></i></a>
+  <a role="button" class="btn btn-primary shadow-none" href="{% url 'patacrep:detail' prev %}"><i class="fas fa-angle-left"></i></a>
   {% else %}
-  <a role="button" class="btn btn-primary disabled" href="#" aria-disabled="true"><i class="fas fa-angle-left"></i></a>
+  <a role="button" class="btn btn-primary shadow-none disabled" href="#" aria-disabled="true"><i class="fas fa-angle-left"></i></a>
   {% endif %}
-  <a role="button" class="btn btn-primary" href="{% url 'patacrep:detail' rand %}"><i class="fas fa-random"></i></a>
+  <a role="button" class="btn btn-primary shadow-none" href="{% url 'patacrep:detail' rand %}"><i class="fas fa-random"></i></a>
   {% if next %}
-  <a role="button" class="btn btn-primary" href="{% url 'patacrep:detail' next %}"><i class="fas fa-angle-right"></i></a>
+  <a role="button" class="btn btn-primary shadow-none" href="{% url 'patacrep:detail' next %}"><i class="fas fa-angle-right"></i></a>
   {% else %}
-  <a role="button" class="btn btn-primary disabled" href="#" aria-disabled="true"><i class="fas fa-angle-right"></i></a>
+  <a role="button" class="btn btn-primary shadow-none disabled" href="#" aria-disabled="true"><i class="fas fa-angle-right"></i></a>
   {% endif %}
 {% endblock %}
 
@@ -57,19 +49,28 @@
     <!-- <a class="dropdown-item option-dropdown" id="edit" href="{% url 'patacrep:confirm_remove' chord.chord_id %}"><i class="fas fa-edit"></i> Edit</a> -->
     <!-- <a class="dropdown-item option-dropdown" id="clean"><i class="fas fa-broom"></i> Clean</a> -->
     <a class="dropdown-item option-dropdown" id="admin-chord" href="{% url 'admin:patacrep_chord_change' chord.chord_id %}"><i class="fas fa-database"></i> Chord</a>
+    <a role="button" class="btn btn-danger" id="delete"><i class="fas fa-trash-alt"></i></a>
+    <form method="POST" id="delete-form" action="{% url 'patacrep:delete' chord.chord_id %}" style="display: none;">
+     {% csrf_token %}
+    </form>
+    <a role="button" class="btn btn-danger" id="edit_state"><i class="fas {% if chord.edited %}fa-lock{% else %}fa-unlock-alt{% endif %}"></i></a>
+    <a role="button" class="btn btn-danger" id="clean"><i class="fas fa-broom"></i></a>
   {% endif %}
 {% endblock options %}
 
 {% block infotab %}
-  <div class="input-group">
+<form class="infotab">
+  <div class="input-group input-group-sm">
     <div class="input-group-prepend capo-prepend" data-toggle="tooltip" data-placement="left" title="Capo (click to reset to original)">
       <label class="input-group-text"><i class="icon-capo"></i></label>
+      <!-- <span class="input-group-text">sm</span> -->
     </div>
     <input type="number" class="form-control shadow-none {% if chord.capo_perso != chord.capo %}capo-perso{%endif%}" min="0" max="30" step="1" id="capo-selector" aria-label="Capo" data-capo="{{chord.capo}}" data-capoperso="{{chord.capo_perso}}" value="{% if chord.capo_perso != chord.capo %}{{chord.capo_perso}}{% else %}{{chord.capo}}{% endif %}" />
   </div>
-  <div class="input-group">
+  <div class="input-group input-group-sm">
     <div class="input-group-prepend" data-toggle="tooltip" data-placement="left" data-html="true" title="1<sup>st</sup> note">
       <label class="input-group-text" for="start-note-selector"><i class="icon-music-note"></i></label>
+      <!-- <span class="input-group-text">su</span> -->
     </div>
     <select class="form-control shadow-none {% if chord.start_note != '-'%}start-note-perso{%endif%}" id="start-note-selector" data-start-note="{{chord.start_note}}">
       {% for value, text in form.start_note.field.choices %}
@@ -81,6 +82,7 @@
       {% endfor %}
     </select>
   </div>
+</form>
 {% endblock infotab %}
 
 

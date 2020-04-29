@@ -33,7 +33,7 @@ span {
     flex-flow: row wrap;
     /*overflow: hidden;*/
     flex: 0 1 auto;
-    align-items: stretch;
+    align-items: center;
     background-color: #39325d;
     color: #dadae0;
     padding: 5px 10px;
@@ -59,16 +59,16 @@ a.website-name {
   color: unset;
 }
 
-a.website-name:hover, .menu-toggle:hover, .fa-star:hover, .fa-star.checked {
+a.website-name:hover, .menu-toggle:hover, .page-title > .fa-star:hover, .page-title > .fa-star.checked {
   color:#fbff4b;
   text-decoration: none;
 }
 
-.fa-hammer:hover, .fa-hammer.checked {
+.page-title > .fa-hammer:hover, .page-title > .fa-hammer.checked {
   color: #DC3545;
 }
 
-.fa-hammer.checked.checkable:hover, .fa-star.checked.checkable:hover {
+.page-title > .fa-hammer.checked.checkable:hover, .page-title > .fa-star.checked.checkable:hover {
   opacity: 0.5;
 }
 
@@ -76,6 +76,7 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover, .fa-star.checked {
   display: flex;
   flex-flow: row wrap;
   align-items: center;
+  /*justify-content: space-around;;*/
   font-size: 24px;
   /*padding: 5px 10px;*/
   margin-left: auto;
@@ -83,7 +84,12 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover, .fa-star.checked {
 }
 
 .page-title > * {
-  margin: 0px 5px;
+  margin-left: 10px;
+}
+
+.page-title > span {
+  display: flex;
+  flex-direction: column;
 }
 
 
@@ -153,6 +159,10 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover, .fa-star.checked {
   border:0px solid transparent; 
   /*-webkit-border-radius: 5px;*/
   /*border-radius: 5px;*/
+}
+
+#edit-chord-container > .input-group {
+  flex-wrap: nowrap;
 }
 
 .no-copy {
@@ -331,9 +341,11 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover, .fa-star.checked {
 
 .infotab {
   display: flex;
-  flex-direction: column;
-  flex: 0 0 50px;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  /*flex: 0 0 50px;*/
   justify-content: center;
+  align-items: center;
 }
 
 
@@ -347,7 +359,7 @@ a.website-name:hover, .menu-toggle:hover, .fa-star:hover, .fa-star.checked {
   color: #39325d;
   font-family: inherit;
   padding: 0px 2px;
-  font-size: 14px;
+  /*font-size: 16px;*/
   text-align: center;
   text-align-last:center;
   font-weight: bold;
@@ -362,12 +374,29 @@ input.capo-perso, .start-note-perso {
   cursor: pointer !important;
 }
 
-.input-group {
+.infotab > .input-group {
   flex-wrap: nowrap;
+  max-width: 64px;
+}
+
+.infotab > .input-group > * {
+  flex: 1 0 auto;
+}
+
+.infotab > .input-group-prepend {
+  display: unset !important;
 }
 
 .input-group-text {
-  padding:1px 3px;
+  /*padding: unset !important;*/
+  /*font-size: 20px !important;*/
+}
+
+.input-group-text > i {
+  /*font-size: 15px;*/
+  margin-top: 2px;
+  margin-bottom: -2px;
+  /*padding:1px 3px 0 !important;*/
 }
 
 input::-webkit-outer-spin-button,
