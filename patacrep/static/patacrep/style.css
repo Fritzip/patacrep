@@ -311,7 +311,7 @@ a.website-name:hover, .menu-toggle:hover, .page-title > .fa-star:hover, .page-ti
 
 .break {
   flex-basis: 100%;
-  height: 0;
+  width: 0;
 }
 
 

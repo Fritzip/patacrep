@@ -178,6 +178,8 @@
       if (!prevItem || prevItem.top >= currItem.top) {
         if ($(this).prev().hasClass('artist')) {
           $( "<span class='break'></span>" ).insertBefore( $(this).prev() );
+        } else {
+          $( "<span class='break'></span>" ).insertBefore( $(this) );
         }
       }
       prevItem = currItem;
