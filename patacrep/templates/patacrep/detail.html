@@ -2,15 +2,17 @@
 {% load static %}
 
 {% block pagetitle %}
-{% if chord.in_project %}
-    <i class="fas fa-hammer checked {% if user.is_superuser %}checkable{% endif %}"></i>
-{% else %}
-    <i class="fas fa-hammer {% if user.is_superuser %}checkable{% endif %}"></i>
-{% endif %}
-{% if chord.favorite %}
-    <i class="fas fa-star checked {% if user.is_superuser %}checkable{% endif %}"></i>
-{% else %}
-    <i class="fas fa-star {% if user.is_superuser %}checkable{% endif %}"></i>
+{% if user.is_superuser %}
+  {% if chord.in_project %}
+      <i class="fas fa-hammer checked checkable"></i>
+  {% else %}
+      <i class="fas fa-hammer checkable"></i>
+  {% endif %}
+  {% if chord.favorite %}
+      <i class="fas fa-star checked checkable"></i>
+  {% else %}
+      <i class="fas fa-star checkable"></i>
+  {% endif %}
 {% endif %}
 <span>{{ chord.title }}</span>
 <div class="dropdown">
