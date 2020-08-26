@@ -6,6 +6,8 @@ from django.urls import reverse
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.views.generic import DetailView
+from django.contrib.auth.decorators import login_required
+
 
 from datetime import datetime, timedelta
 
@@ -30,29 +32,30 @@ def index(request):
 
     return render(request, 'patacrep/index.html', context)
 
+@login_required
 def update(request):
     context = {'nb_chords':Chord.objects.count()}
 
     if request.user.is_superuser:
-            output = update_all() 
-            output['new_to_db'] = [get_chord_name_from_id(pkid) for pkid in output['new_to_db']]
-            output['updated_in_db'] = [get_chord_name_from_id(pkid) for pkid in output['updated_in_db']]
-            output['already_in_db'] = [get_chord_name_from_id(pkid) for pkid in output['already_in_db']]
-            # output['duplicates'] = [get_chord_name_from_id(pkid) for pkid in output['duplicates']]
-            d = {}
-            for pkid, filename in output['duplicates']:
-                if pkid in d:
-                    d[pkid].append(filename)
-                else:
-                    d[pkid] = [filename]
+        output = update_all() 
+        output['new_to_db'] = [get_chord_name_from_id(pkid) for pkid in output['new_to_db']]
+        output['updated_in_db'] = [get_chord_name_from_id(pkid) for pkid in output['updated_in_db']]
+        output['already_in_db'] = [get_chord_name_from_id(pkid) for pkid in output['already_in_db']]
+        # output['duplicates'] = [get_chord_name_from_id(pkid) for pkid in output['duplicates']]
+        d = {}
+        for pkid, filename in output['duplicates']:
+            if pkid in d:
+                d[pkid].append(filename)
+            else:
+                d[pkid] = [filename]
 
-            pkids = list(d.keys())
-            for pkid in pkids:
-                d[pkid].append(os.path.basename(Chord.objects.only('file').get(pk=pkid).file.name))
-                d[get_chord_name_from_id(pkid)] = d.pop(pkid)
+        pkids = list(d.keys())
+        for pkid in pkids:
+            d[pkid].append(os.path.basename(Chord.objects.only('file').get(pk=pkid).file.name))
+            d[get_chord_name_from_id(pkid)] = d.pop(pkid)
 
-            output['duplicates'] = d
-            context['output'] = output
+        output['duplicates'] = d
+        context['output'] = output
 
     return render(request, 'patacrep/update.html', context)
 
@@ -113,8 +116,6 @@ class ChordDelete(UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         return self.request.user.is_superuser and not self.get_object().edited
-
-from django.contrib.auth.decorators import login_required
 
 def toggle_favorite(request):
     success = False
